@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { LoaderCircle, X, CheckCircle2 } from "lucide-react";
 import ServiceCard, { type Service } from "../components/ServiceCard";
 
+// CORRECCIÓN: Usamos la variable de entorno para producción
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 export default function BookingView() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +28,8 @@ export default function BookingView() {
   const [cpLoading, setCpLoading] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:3000/services")
+    // CORRECCIÓN: Usamos la constante API_URL
+    fetch(`${API_URL}/services`)
       .then((res) => res.json())
       .then((data) => setServices(Array.isArray(data) ? data : []))
       .catch((err) => setErrorMsg("Error al cargar el catálogo."))
@@ -47,8 +51,6 @@ export default function BookingView() {
           setStateName(place['state']);
           setCity(place['place name']);
           
-          // Simulamos las colonias porque Zippopotam no las trae (necesitarías una base de datos de SEPOMEX para producción)
-          // Pero aquí te mostramos cómo funcionaría el dropdown
           setNeighborhoods(["Colonia Centro", "Fracc. Las Palmas", "Zona Río", "Otra (Especificar)"]);
         } else {
           setStateName("");
@@ -79,7 +81,8 @@ export default function BookingView() {
       const fullAddress = `${street} ${extNumber}${intNumber ? ` Int ${intNumber}` : ''}, ${selectedNeighborhood}`;
 
       // 1. Crear Propiedad
-      const propRes = await fetch("http://localhost:3000/properties", {
+      // CORRECCIÓN: Usamos la constante API_URL
+      const propRes = await fetch(`${API_URL}/properties`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ 
@@ -99,7 +102,8 @@ export default function BookingView() {
       const property = await propRes.json();
 
       // 2. Crear Reserva
-      const bookRes = await fetch("http://localhost:3000/bookings", {
+      // CORRECCIÓN: Usamos la constante API_URL
+      const bookRes = await fetch(`${API_URL}/bookings`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
