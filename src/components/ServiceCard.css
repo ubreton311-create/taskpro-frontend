@@ -1,0 +1,388 @@
+:root {
+  --primary: #7a2fbf;
+  --primary-hover: #64239f;
+  --text-primary: #252136;
+  --text-secondary: #777386;
+  --border: #eeeaf3;
+  --surface: #ffffff;
+  --star-color: #f5b82e;
+  --card-radius: 12px; /* Bordes más sutiles */
+  --card-shadow: 0 2px 12px rgba(35, 20, 55, 0.05);
+  --card-shadow-hover: 0 8px 24px rgba(35, 20, 55, 0.1);
+}
+
+/* =========================================
+   GRID ESTRICTO: 4 COLUMNAS SIEMPRE
+========================================= */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)); /* Forzado a 4 */
+  gap: 16px; /* Espacio compacto */
+  width: 100%;
+  align-items: stretch;
+}
+
+/* Solo bajamos a 3 columnas en pantallas de tablet (menos de 1100px) */
+@media (max-width: 1100px) {
+  .services-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 850px) {
+  .services-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================
+   TARJETA PRINCIPAL (Súper Compacta)
+========================================= */
+.service-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* =========================================
+   HEADER DE CATEGORÍA (MÁS BAJO)
+========================================= */
+.service-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 60px; /* Reducido de 80px */
+  padding: 10px; /* Reducido de 14px */
+  background: linear-gradient(135deg, #e9e0ff, #c9b4f5);
+}
+
+.service-card__category-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px; /* Reducido de 42px */
+  height: 32px;
+  color: var(--primary);
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(50, 30, 80, 0.1);
+}
+
+.service-card__category-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.service-card__category-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.service-card__category-name {
+  color: #302342;
+  font-size: 9.5px; /* Texto más pequeño */
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.service-card__category-subtitle {
+  color: rgba(48, 35, 66, 0.75);
+  font-size: 8px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* Gradientes por categoría */
+.service-card--health .service-card__header { background: linear-gradient(135deg, #dff4ff, #a5d9f3); }
+.service-card--health .service-card__category-icon { color: #2789bf; }
+.service-card--garden .service-card__header { background: linear-gradient(135deg, #e1f6e5, #a9dfb4); }
+.service-card--garden .service-card__category-icon { color: #39975c; }
+.service-card--cleaning .service-card__header { background: linear-gradient(135deg, #eee5ff, #cbb4f6); }
+.service-card--cleaning .service-card__category-icon { color: #8452c9; }
+.service-card--electricity .service-card__header { background: linear-gradient(135deg, #fff3d4, #f7d88e); }
+.service-card--electricity .service-card__category-icon { color: #d49b16; }
+.service-card--plumbing .service-card__header { background: linear-gradient(135deg, #d9f3f6, #9dd8e4); }
+.service-card--plumbing .service-card__category-icon { color: #32899f; }
+.service-card--repairs .service-card__header { background: linear-gradient(135deg, #ffebd9, #f5c397); }
+.service-card--repairs .service-card__category-icon { color: #c87937; }
+.service-card--painting .service-card__header { background: linear-gradient(135deg, #ffe4ee, #f4b8d0); }
+.service-card--painting .service-card__category-icon { color: #c65d8d; }
+.service-card--ac .service-card__header { background: linear-gradient(135deg, #dff4ff, #a5d9f3); }
+.service-card--ac .service-card__category-icon { color: #2789bf; }
+.service-card--appliances .service-card__header { background: linear-gradient(135deg, #e2e8f0, #94a3b8); }
+.service-card--appliances .service-card__category-icon { color: #64748b; }
+.service-card--masonry .service-card__header { background: linear-gradient(135deg, #fecdd3, #fda4af); }
+.service-card--masonry .service-card__category-icon { color: #e11d48; }
+.service-card--carpentry .service-card__header { background: linear-gradient(135deg, #fde68a, #fcd34d); }
+.service-card--carpentry .service-card__category-icon { color: #d97706; }
+.service-card--glass .service-card__header { background: linear-gradient(135deg, #bae6fd, #7dd3fc); }
+.service-card--glass .service-card__category-icon { color: #0284c7; }
+.service-card--home .service-card__header, .service-card--default .service-card__header { background: linear-gradient(135deg, #e9e0ff, #c9b4f5); }
+
+/* =========================================
+   PERFIL DEL PROVEEDOR
+========================================= */
+.service-card__provider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 10px 4px; /* Muy compacto */
+}
+
+.service-card__avatar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 40px; /* Reducido de 50px */
+  height: 40px;
+  overflow: hidden;
+  color: #ffffff;
+  background: linear-gradient(135deg, #9c71d2, #642b9e);
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(30, 20, 50, 0.1);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.service-card__avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.service-card__reputation {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.service-card__rating-number {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.service-card__rating-number strong {
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.service-card__rating-number svg {
+  width: 12px;
+  height: 12px;
+}
+
+.service-card__rating-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.service-card__rating-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 4px;
+  color: #c6c2ce;
+  font-size: 6px;
+}
+
+.service-card__bar-track {
+  flex: 1;
+  height: 3px;
+  overflow: hidden;
+  background: #eeedf1;
+  border-radius: 10px;
+}
+
+.service-card__bar-fill { height: 100%; border-radius: 10px; }
+.service-card__bar-fill--green { background: #35ad75; }
+.service-card__bar-fill--yellow { background: #f0bd3f; }
+.service-card__bar-fill--gray { background: #bfc0c8; }
+
+.service-card__provider-name {
+  padding: 0 10px 6px;
+  color: var(--text-primary);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+/* =========================================
+   ESTADÍSTICAS
+========================================= */
+.service-card__stats {
+  margin: 0 10px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.service-card__stats ul {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.service-card__stats li {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-size: 8.5px;
+  line-height: 1.3;
+}
+
+.service-card__stats li strong {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.service-card__bullet {
+  flex-shrink: 0;
+  width: 3px;
+  height: 3px;
+  margin-top: 3.5px;
+  background: var(--primary);
+  border-radius: 50%;
+}
+
+/* =========================================
+   DETALLES DEL SERVICIO
+========================================= */
+.service-card__details {
+  flex: 1;
+  padding: 10px;
+}
+
+.service-card__title {
+  margin: 0 0 4px;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.service-card__description {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 9.5px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* =========================================
+   FOOTER: PRECIO Y BOTÓN
+========================================= */
+.service-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+
+.service-card__price {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.service-card__price span {
+  color: var(--text-secondary);
+  font-size: 8px;
+}
+
+.service-card__price strong {
+  color: var(--primary);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.service-card__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 8px;
+  color: #ffffff;
+  background: var(--primary);
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.service-card__button:hover {
+  background: var(--primary-hover);
+}
+
+/* =========================================
+   CALIFICACIÓN INFERIOR
+========================================= */
+.service-card__bottom-rating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 10px 8px;
+  background: #faf9fc;
+  border-top: 1px solid var(--border);
+}
+
+.service-card__bottom-stars {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.service-card__bottom-stars svg {
+  width: 10px;
+  height: 10px;
+}
+
+.service-card__bottom-rating span {
+  color: var(--text-secondary);
+  font-size: 8px;
+  font-weight: 600;
+}

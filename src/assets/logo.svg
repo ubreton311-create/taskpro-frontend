@@ -1,0 +1,13 @@
+<svg width="300" height="80" viewBox="0 0 300 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(0, 10)">
+    <!-- Icono T -->
+    <path d="M0 0H50L40 15H30V50L15 60V15H0V0Z" fill="#6842d9"/>
+    <path d="M30 15H50L40 30H30V15Z" fill="#4c2db3"/>
+    <path d="M30 30L15 45V60L30 45V30Z" fill="#4c2db3"/>
+    
+    <!-- Texto TaskPro -->
+    <text x="65" y="35" font-family="Arial, sans-serif" font-weight="900" font-size="32" fill="#2d1b69" letter-spacing="-1">TaskPro</text>
+    <!-- Texto USA -->
+    <text x="210" y="35" font-family="Arial, sans-serif" font-weight="600" font-size="24" fill="#6842d9">USA</text>
+  </g>
+</svg>
