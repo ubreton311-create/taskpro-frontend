@@ -11,6 +11,11 @@ interface BaseField {
   type: FormFieldType;
   required?: boolean;
   description?: string;
+  /** Muestra el campo solo cuando otro campo tiene el valor indicado. */
+  conditionalOn?: {
+    field: string;
+    value: string | number | boolean;
+  };
 }
 
 export interface NumberField extends BaseField {

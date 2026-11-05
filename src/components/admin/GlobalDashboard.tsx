@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Users, BriefcaseBusiness, DollarSign, Clock, FileText, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { adminApi } from "../../services/adminApi"; // Asegúrate de que esta ruta sea correcta
+import { adminDashboardApi } from "../../services/adminDashboardApi";
 import { getCurrentUser } from "../../utils/auth";
 
 export default function GlobalDashboard() {
@@ -20,7 +20,7 @@ export default function GlobalDashboard() {
         
         // Cargamos las métricas y las últimas cotizaciones en paralelo
         const [statsRes, quotesRes] = await Promise.all([
-          adminApi.getStats(), // Asumiendo que tienes este método en adminApi
+          adminDashboardApi.getStats(),
           fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/quotes`, {
             headers: { Authorization: `Bearer ${token}` }
           }).then(res => res.json())

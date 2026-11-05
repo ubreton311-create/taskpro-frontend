@@ -1,8 +1,7 @@
-import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import {
-  ArrowLeft, ArrowRight, Check, CheckCircle2, Upload, MapPin,
-  ShieldCheck, UserRound, BriefcaseBusiness, Fingerprint,
-  LoaderCircle, AlertCircle, Globe, Home
+  ArrowLeft, ArrowRight, Check, CheckCircle2, MapPin,
+  ShieldCheck, LoaderCircle
 } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";

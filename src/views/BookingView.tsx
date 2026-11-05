@@ -32,7 +32,7 @@ export default function BookingView() {
     fetch(`${API_URL}/services`)
       .then((res) => res.json())
       .then((data) => setServices(Array.isArray(data) ? data : []))
-      .catch((err) => setErrorMsg("Error al cargar el catálogo."))
+      .catch(() => setErrorMsg("Error al cargar el catálogo."))
       .finally(() => setLoading(false));
   }, []);
 

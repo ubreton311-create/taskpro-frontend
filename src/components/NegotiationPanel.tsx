@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
-import { Send, Lock, ShieldCheck, DollarSign, CheckCircle2, Phone } from "lucide-react";
+import { useState } from "react";
+import { Send, Lock, ShieldCheck, DollarSign, CheckCircle2 } from "lucide-react";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 interface NegotiationPanelProps {
   quoteId: string;
@@ -23,7 +25,7 @@ export default function NegotiationPanel({ quoteId, initialAmount, onPaymentSucc
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:3000/negotiations/counter-offer", {
+      const res = await fetch(`${API_URL}/negotiations/counter-offer`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ quoteId, amount: Number(amount), message }),
@@ -47,7 +49,7 @@ export default function NegotiationPanel({ quoteId, initialAmount, onPaymentSucc
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:3000/quotes/${quoteId}/pay`, {
+      const res = await fetch(`${API_URL}/quotes/${quoteId}/pay`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });

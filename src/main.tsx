@@ -17,7 +17,6 @@ import LoginView from "./views/LoginView";
 import RequestQuoteView from "./views/RequestQuoteView";
 import ProviderDashboardView from "./views/ProviderDashboardView";
 import ProviderOnboardingView from "./views/ProviderOnboardingView";
-import ServicesView from "./views/ServicesView";
 import AdminDashboardView from "./views/AdminDashboardView";
 import StaffView from "./views/StaffView";
 import ReportsView from "./views/ReportsView";
@@ -97,8 +96,6 @@ function BillingRoute() {
 }
 
 function AppLayout() {
-  const location = useLocation();
-  
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-50">
       <Sidebar />
@@ -126,6 +123,7 @@ function AppLayout() {
             <Route path="/reports" element={<ReportsView />} />
             <Route path="/clients" element={<ClientsView />} />
             <Route path="/settings" element={<SettingsView />} />
+            <Route path="/billing" element={<BillingRoute />} />
             
             <Route path="/tracking" element={<PlaceholderPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
