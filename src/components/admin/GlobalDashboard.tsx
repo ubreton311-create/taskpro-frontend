@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { Users, BriefcaseBusiness, DollarSign, Clock, FileText, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { adminDashboardApi } from "../../services/adminDashboardApi";
 import { getCurrentUser } from "../../utils/auth";
+import { API_URL } from '../../services/config';
+import { getErrorMessage } from '../../utils/errors';
+import { adminDashboardApi, type AdminStats } from '../../services/adminDashboardApi';
+import type { ApiQuote } from '../../types/api.types';
 
 export default function GlobalDashboard() {
   const navigate = useNavigate();
   const user = getCurrentUser();
-  const [stats, setStats] = useState<any>(null);
-  const [quotes, setQuotes] = useState<any[]>([]);
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [quotes, setQuotes] = useState<ApiQuote[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -21,15 +24,15 @@ export default function GlobalDashboard() {
         // Cargamos las métricas y las últimas cotizaciones en paralelo
         const [statsRes, quotesRes] = await Promise.all([
           adminDashboardApi.getStats(),
-          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/quotes`, {
+          fetch(`${API_URL}/quotes`, {
             headers: { Authorization: `Bearer ${token}` }
           }).then(res => res.json())
         ]);
 
         setStats(statsRes);
-        setQuotes(Array.isArray(quotesRes) ? quotesRes.slice(0, 5) : []);
-      } catch (err: any) {
-        setError(err.message || "No se pudo cargar el dashboard.");
+        setQuotes(Array.isArray(quotesRes) ? (quotesRes as ApiQuote[]).slice(0, 5) : []);
+      } catch (err: unknown) {
+        setError(getErrorMessage(err, "No se pudo cargar el dashboard."));
       } finally {
         setLoading(false);
       }

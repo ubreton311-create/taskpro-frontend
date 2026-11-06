@@ -20,7 +20,7 @@ import {
   Navigation,
 } from "lucide-react";
 
-import { useTranslation } from "../i18n/i18n";
+import { useTranslation } from "../i18n/useTranslation";
 import { getCurrentUser } from "../utils/auth";
 
 type Service = {
@@ -220,7 +220,7 @@ export default function Dashboard() {
           const data = await resApts.json();
           if (data?.length) setAppointments(data);
         }
-      } catch (error) {
+      } catch {
         console.warn("Backend offline. Mostrando datos de respaldo.");
       }
     };
@@ -257,7 +257,7 @@ export default function Dashboard() {
       const title = t(service.translationKey);
       return title.toLocaleLowerCase(locale).includes(normalized);
     });
-  }, [search, language, locale, t, services]);
+  }, [search, locale, t, services]);
 
   const toggleFavorite = (id: string) => {
     setFavorites((current) =>

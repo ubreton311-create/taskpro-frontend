@@ -80,7 +80,7 @@ antes de volver a desplegar.
 | `scripts/serve.mjs` | Servidor estático de producción **sin dependencias extra**: sirve `dist/`, hace *fallback* SPA solo en rutas de la app (recargar `/quotes` o `/checkout/123` ya no da 404), devuelve **404 real** si un asset de `/assets/` o un archivo con extensión estática no existe, responde **400** a URLs malformadas o con byte NUL en lugar de tumbar el proceso, expone `/healthz`, escucha en `0.0.0.0:$PORT` y cachea los assets con hash. |
 | `package.json` | Nuevos scripts `start` (producción) y `typecheck`, más `engines.node`. |
 | `.nvmrc` | Node 22, la misma versión con la que se validó el build. |
-| `.env.example` | Documenta `VITE_API_URL` y `VITE_GOOGLE_CLIENT_ID`. |
+| `.env.example` | Documenta todas las variables: `VITE_API_URL` (obligatoria), `VITE_GOOGLE_CLIENT_ID` y los canales opcionales `VITE_SUPPORT_EMAIL` / `VITE_SUPPORT_PHONE` / `VITE_SUPPORT_WHATSAPP`. |
 | `.github/workflows/ci.yml` | Ejecuta `typecheck` + `build` en cada push/PR: si algo rompe la compilación lo ves en GitHub, **antes** de gastar un despliegue. |
 | `.gitignore` | `*.tsbuildinfo` (el `tsconfig.tsbuildinfo` estaba versionado y puede producir builds con caché vieja; se dejó de trackear). |
 
@@ -95,7 +95,7 @@ antes de volver a desplegar.
 
 | Variable | Valor | Nota |
 | --- | --- | --- |
-| `VITE_API_URL` | `https://<tu-backend>.up.railway.app` (sin `/` final) | **Se inyecta en tiempo de build.** Si la agregas después de desplegar, hay que volver a desplegar. Sin ella la app apunta a `http://localhost:3000`. |
+| `VITE_API_URL` | `https://<tu-backend>.up.railway.app` (sin `/` final) | **Se inyecta en tiempo de build y es obligatoria.** Si falta, `npm run build` falla con `VITE_API_URL is not set` (no se despliega una app apuntando a `localhost`). Si la agregas después de desplegar, hay que volver a desplegar. |
 | `VITE_GOOGLE_CLIENT_ID` | tu client id de Google | Opcional; sin él el botón de Google no funciona. |
 | `NIXPACKS_NODE_VERSION` | `22` | Opcional, refuerza la versión de Node. |
 
@@ -174,6 +174,62 @@ Para el backend, la ruta de diagnóstico es idéntica:
 - [x] Fallback SPA: recargar cualquier ruta interna ya no da 404.
 - [x] Assets con hash → caché inmutable; `index.html` nunca se cachea (evita “no se ven mis cambios”).
 - [x] CI en GitHub con `typecheck` + `build`: el error aparece antes del despliegue.
-- [x] Ninguna URL `localhost` en el código: todo pasa por `VITE_API_URL`.
+- [x] Ninguna URL `localhost` en el código: todo pasa por `src/services/config.ts`.
+- [x] Un build sin `VITE_API_URL` **falla** en vez de desplegar una app rota.
+- [x] Netlify (previews) descrito en `netlify.toml`; Railway (producción) en `railway.json`.
+- [x] `.env` ya no está versionado; `.env.example` documenta cada variable.
 - [ ] Pendiente recomendado: dividir el bundle (hoy ~872 kB) con `React.lazy` por ruta.
 - [ ] Pendiente recomendado: comprimir `public/favicon.svg` (1.9 MB).
+
+## 8. Entorno y hosts: quién construye qué
+
+> Guía completa de variables por entorno (local, producción, preview, CI),
+> verificación y solución de problemas: **[`docs/environment.md`](docs/environment.md)**.
+
+### 8.1 Variables obligatorias
+
+| Variable | Obligatoria | Efecto si falta |
+| --- | --- | --- |
+| `VITE_API_URL` | **Sí** (build de producción) | El build se detiene con `VITE_API_URL is not set`. En `npm run dev` cae a `http://localhost:3000`. |
+| `VITE_GOOGLE_CLIENT_ID` | No | Se oculta el botón de Google; el formulario con correo sigue funcionando. |
+| `VITE_SUPPORT_EMAIL` | No | Se oculta el canal de correo en Servicio al Cliente. |
+| `VITE_SUPPORT_PHONE` | No | Se oculta el canal telefónico. |
+| `VITE_SUPPORT_WHATSAPP` | No | Se oculta el canal de WhatsApp. |
+
+Ningún canal de soporte se muestra "de mentira": si la variable no está, el canal no
+se renderiza. Antes había un teléfono `+52 664 000 0000` y un `wa.me` que no llegaban
+a nadie.
+
+Las variables `VITE_*` se **inyectan en el bundle** en tiempo de compilación: son
+públicas por diseño. No pongas secretos aquí.
+
+### 8.2 Dos hosts, dos configuraciones
+
+| Host | Para qué | Configuración | Fallback SPA |
+| --- | --- | --- | --- |
+| **Railway** (producción) | Sirve la app a usuarios reales | `railway.json`: build `npm ci && npm run build`, start `node scripts/serve.mjs`, healthcheck `/healthz` | `scripts/serve.mjs` |
+| **Netlify** (previews de PR) | Preview por pull request | `netlify.toml`: build `npm run build`, publish `dist`, `NODE_VERSION=22`, redirect `/* → /index.html` | `netlify.toml` |
+
+Ambos hosts leen la misma variable `VITE_API_URL`, pero **cada uno la define en su
+propio panel** (`Railway → Variables`, `Netlify → Site settings → Environment
+variables`). Si configuras solo uno, el otro falla en el build — que es justamente
+el comportamiento buscado.
+
+`public/_redirects` se eliminó: era una regla exclusiva de Netlify duplicada con
+`netlify.toml`.
+
+### 8.3 Versión de Node
+
+`package.json#engines` exige `>=22.12 <23`, `.nvmrc` fija `22` y `netlify.toml` fija
+`NODE_VERSION=22`. Es el rango que soporta `vite@8`; el pin anterior (`>=20 <23`)
+permitía Node 21, que Vite no soporta.
+
+### 8.4 Cómo verificar antes de desplegar
+
+```bash
+npm ci
+VITE_API_URL=https://tu-backend.up.railway.app npm run build   # debe imprimir "✓ built in ..."
+npm run lint                                                   # debe terminar sin errores
+node scripts/serve.mjs                                         # sirve dist/ en 0.0.0.0:$PORT
+curl -s localhost:4173/healthz                                 # -> ok
+```

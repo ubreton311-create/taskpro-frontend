@@ -2,8 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AlertCircle, LoaderCircle, ArrowLeft } from "lucide-react";
 import CheckoutStep from "../components/CheckoutStep";
+import { API_URL } from '../services/config';
+import { getErrorMessage } from '../utils/errors';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 interface QuoteData {
   id: string;
@@ -11,6 +12,9 @@ interface QuoteData {
   commissionAmount: number | string;
   totalAmount: number | string;
   scheduledDate?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
   title?: string;
   service?: { name?: string; description?: string };
 }
@@ -31,16 +35,11 @@ export default function CheckoutView() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!quoteId) {
-      setError("No se proporcionó un identificador de cotización.");
-      setLoading(false);
-      return;
-    }
+    if (!quoteId) return;
 
     const controller = new AbortController();
 
     async function fetchQuote() {
-      setLoading(true);
       try {
         const response = await fetch(`${API_URL}/quotes/${quoteId}`, {
           method: "GET",
@@ -55,32 +54,36 @@ export default function CheckoutView() {
         }
 
         setQuote(data);
-      } catch (err: any) {
-        if (err.name === "AbortError") return;
-        setError(err.message || "Ocurrió un error al cargar la cotización.");
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setError(getErrorMessage(err, "Ocurrió un error al cargar la cotización."));
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
     }
 
-    fetchQuote();
+    void fetchQuote();
     return () => controller.abort();
   }, [quoteId]);
 
   const handlePay = useCallback(async () => {
     if (!quoteId) throw new Error("No se encontró el ID de la cotización.");
-    
+    if (!quote) throw new Error("La cotización aún no se ha cargado.");
+    if (!quote.scheduledDate) throw new Error("La cotización no tiene una fecha agendada.");
+    if (!quote.address) throw new Error("La cotización no tiene una dirección registrada.");
+
     try {
       const response = await fetch(`${API_URL}/bookings/finalize`, {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify({
           quoteId,
-          scheduledDate: new Date(Date.now() + 86400000).toISOString(), // Mañana
+          scheduledDate: quote.scheduledDate,
           addressInfo: {
-            exactAddress: "Dirección capturada en el sistema", 
-            latitude: 32.5149,
-            longitude: -117.0382,
+            exactAddress: quote.address,
+            ...(typeof quote.latitude === "number" && typeof quote.longitude === "number"
+              ? { latitude: quote.latitude, longitude: quote.longitude }
+              : {}),
             additionalInstructions: "",
           },
         }),
@@ -95,12 +98,13 @@ export default function CheckoutView() {
       if (!data.checkoutUrl) throw new Error("El servidor no devolvió una URL de pago válida.");
       
       window.location.assign(data.checkoutUrl);
-    } catch (err: any) {
-      throw new Error(err.message || "Error al procesar el pago.");
+    } catch (err: unknown) {
+      throw new Error(getErrorMessage(err, "Error al procesar el pago."), { cause: err });
     }
-  }, [quoteId]);
+  }, [quoteId, quote]);
 
-  if (loading) {
+  // Without a route param there is nothing to fetch: go straight to the error panel.
+  if (loading && quoteId) {
     return (
       <main className="flex min-h-[70vh] items-center justify-center bg-[#f8f9fc]">
         <div className="text-center">
@@ -112,7 +116,7 @@ export default function CheckoutView() {
   }
 
   // Si hay un error, o si simplemente no hay cotización, mostramos el panel de error.
-  if (error || !quote) {
+  if (!quoteId || error || !quote) {
     return (
       <main className="flex min-h-[70vh] items-center justify-center bg-[#f8f9fc] px-4">
         <div className="w-full max-w-md rounded-3xl border border-[#eeeaf3] bg-white p-8 text-center shadow-[0_12px_45px_rgba(48,25,73,0.07)]">
@@ -123,7 +127,10 @@ export default function CheckoutView() {
             No pudimos cargar tu cotización
           </h2>
           <p className="mt-2 text-sm font-medium text-[#777386]">
-            {error || "El ID de la cotización no es válido o no tienes acceso a ella."}
+            {error ||
+              (quoteId
+                ? "El ID de la cotización no es válido o no tienes acceso a ella."
+                : "No se proporcionó un identificador de cotización.")}
           </p>
           <button 
             onClick={() => window.history.back()}

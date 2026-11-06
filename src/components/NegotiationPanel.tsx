@@ -1,12 +1,26 @@
 import { useState } from "react";
 import { Send, Lock, ShieldCheck, DollarSign, CheckCircle2 } from "lucide-react";
+import { API_URL } from '../services/config';
+import { getErrorMessage, getApiErrorMessage } from '../utils/errors';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+export interface ProviderContact {
+  id?: string;
+  name?: string;
+  phone?: string;
+  email?: string;
+}
+
+interface NegotiationEntry {
+  amount: number;
+  message: string;
+  type: 'sent' | 'received';
+}
 
 interface NegotiationPanelProps {
   quoteId: string;
   initialAmount: number;
-  onPaymentSuccess: (providerInfo: any) => void;
+  onPaymentSuccess: (providerInfo: ProviderContact) => void;
 }
 
 export default function NegotiationPanel({ quoteId, initialAmount, onPaymentSuccess }: NegotiationPanelProps) {
@@ -16,7 +30,7 @@ export default function NegotiationPanel({ quoteId, initialAmount, onPaymentSucc
   const [error, setError] = useState("");
   
   // Simulamos el historial por ahora
-  const [history, setHistory] = useState<any[]>([]); 
+  const [history, setHistory] = useState<NegotiationEntry[]>([]); 
 
   const handleCounterOffer = async () => {
     if (!amount || !message) return setError("Ingresa un monto y un mensaje.");
@@ -32,14 +46,14 @@ export default function NegotiationPanel({ quoteId, initialAmount, onPaymentSucc
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Error al enviar contraoferta");
+      if (!res.ok) throw new Error(getApiErrorMessage(data, "Error al enviar contraoferta"), { cause: data });
 
       // Actualizamos el historial local (idealmente hacemos un fetch de los logs aquí)
       setHistory([...history, { amount, message, type: 'sent' }]);
       setMessage("");
       alert("Contraoferta enviada. El sistema ha filtrado cualquier dato de contacto.");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -55,12 +69,12 @@ export default function NegotiationPanel({ quoteId, initialAmount, onPaymentSucc
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Error al procesar el pago");
+      if (!res.ok) throw new Error(getApiErrorMessage(data, "Error al procesar el pago"), { cause: data });
 
       // Si el pago es exitoso, el backend nos devuelve el teléfono
-      onPaymentSuccess(data.provider);
-    } catch (err: any) {
-      setError(err.message);
+      onPaymentSuccess(data.provider as ProviderContact);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

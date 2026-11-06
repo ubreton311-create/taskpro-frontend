@@ -1,12 +1,21 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { X, Send } from 'lucide-react';
+import { API_URL } from '../../services/config';
 
 interface ChatMessage {
   id: string;
   senderId: string;
   content: string;
   createdAt: string;
+}
+
+interface SocketAck {
+  event: string;
+}
+
+interface MessagesAck extends SocketAck {
+  data: ChatMessage[];
 }
 
 interface ChatBoxProps {
@@ -16,7 +25,6 @@ interface ChatBoxProps {
   onClose: () => void;
 }
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export default function ChatBox({ quoteId, currentUserId, otherUserName, onClose }: ChatBoxProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -27,11 +35,14 @@ export default function ChatBox({ quoteId, currentUserId, otherUserName, onClose
   const socketRef = useRef<Socket | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
+  // No token means the socket can never authenticate: surface it from render, not from an effect.
+  const sessionError = localStorage.getItem('token') ? '' : 'Sesión expirada.';
+
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) return setError('Sesión expirada.');
+    if (!token) return;
 
-    const socket = io(`${SOCKET_URL}/chat`, {
+    const socket = io(`${API_URL}/chat`, {
       auth: { token },
       transports: ['websocket'],
     });
@@ -40,9 +51,9 @@ export default function ChatBox({ quoteId, currentUserId, otherUserName, onClose
 
     socket.on('connect', () => {
       setConnected(true);
-      socket.emit('joinQuote', { quoteId }, (res: any) => {
+      socket.emit('joinQuote', { quoteId }, (res: SocketAck) => {
         if (res.event === 'joinedQuote') {
-          socket.emit('getMessages', { quoteId }, (result: any) => {
+          socket.emit('getMessages', { quoteId }, (result: MessagesAck) => {
             if (result.event === 'quoteMessages') setMessages(result.data);
           });
         }
@@ -117,7 +128,9 @@ export default function ChatBox({ quoteId, currentUserId, otherUserName, onClose
           <div ref={bottomRef} />
         </div>
 
-        {error && <p className="bg-red-50 text-red-600 text-xs px-5 py-2">{error}</p>}
+        {(error || sessionError) && (
+          <p className="bg-red-50 text-red-600 text-xs px-5 py-2">{error || sessionError}</p>
+        )}
 
         <form onSubmit={handleSubmit} className="border-t border-[#eeeaf5] bg-white p-4">
           <div className="flex items-center gap-2 rounded-xl border border-[#eeeaf5] bg-[#faf9fc] p-2 focus-within:border-[#7a2fbf]">

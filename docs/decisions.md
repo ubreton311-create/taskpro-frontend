@@ -78,3 +78,69 @@ optional step.
 **Consequence:** a change that fixes behaviour but leaves the build red is not
 done. Lowering `strict`/`noUnusedLocals`, adding `// @ts-nocheck`, or dropping
 `tsc -b` from `build` is a Blocker per the AGENTS.md checklist (SEC-03).
+
+---
+
+## D-006 — A missing `VITE_API_URL` fails the build
+
+**Date:** 2026-11-06 · **Status:** accepted
+
+`VITE_API_URL` is mandatory for production builds. There is no silent
+`localhost` fallback outside development: `vite.config.ts` refuses to build
+without it, and `src/services/config.ts` is the only module that reads it.
+
+**Rationale:** the previous fallback turned a missing environment variable into a
+deployed bundle that called `http://localhost:3000` from the user's browser. That
+is indistinguishable from an unrelated outage and costs a full debugging cycle.
+A build that stops with "VITE_API_URL is not set" is cheaper than a deploy that
+looks successful and is broken.
+
+**Consequence:** every build environment (Railway, Netlify, CI) must define the
+variable. Local development keeps the `http://localhost:3000` fallback so `npm
+run dev` works with no setup.
+
+---
+
+## D-007 — Railway is production; Netlify is preview-only
+
+**Date:** 2026-11-06 · **Status:** accepted
+
+Production is the Railway service described by `railway.json` (`npm ci && npm
+run build`, `node scripts/serve.mjs`, healthcheck `/healthz`). Netlify stays
+connected for pull-request deploy previews and is configured by `netlify.toml`.
+
+**Rationale:** the repo previously contained `public/_redirects` (a Netlify-only
+file) with no `netlify.toml`, while `DEPLOY.md` described Railway — so the
+"which deployment failed?" question had two possible answers and neither was
+written down. Both hosts are real; both are now described in the repo.
+
+**Consequence:** a fix verified on one host is not automatically verified on the
+other. `public/_redirects` was replaced by the redirect in `netlify.toml` so SPA
+routing has a single source per host (`netlify.toml` for Netlify, `serve.mjs`
+for Railway).
+
+---
+
+## D-008 — Lint is a merge gate, and CI builds with a placeholder API URL
+
+**Date:** 2026-11-05 · **Status:** accepted
+
+`npm run lint` must exit 0 and runs in CI before the build. The lint baseline
+(60 errors: 37 `no-explicit-any`, 9 `set-state-in-effect`, 9
+`only-export-components`, 4 `no-unused-vars`, 1 `preserve-caught-error`) was
+burned down to zero rather than silenced, because a permanently red linter
+trains everyone to ignore it.
+
+**Rationale:** a linter with no gate is documentation nobody runs; a linter that
+is red on `main` cannot distinguish a new violation from the existing backlog.
+
+**Consequence:** CI sets `VITE_API_URL=https://api.example.com` for the build
+step only — the build must succeed without real credentials, and D-006 means the
+variable cannot be omitted. New violations fail the PR. Making the check
+*required* on `main` is a repository setting, not something a commit can do.
+
+Three structural changes came out of the same rule set: the route components
+moved from `main.tsx` to `src/App.tsx`, the i18n hook moved to
+`src/i18n/useTranslation.ts`, and data loading became cancellable
+`fetch → .then(...)` chains instead of `useEffect(() => { load(); }, [load])`,
+which also removed a race where a late response could overwrite newer state.

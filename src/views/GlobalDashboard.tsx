@@ -69,7 +69,6 @@ function MetricCard({ title, value, description, icon: Icon, loading, accent = f
 }
 
 export default function GlobalDashboard() {
-  const [adminName, setAdminName] = useState('Administrador');
   const [stats, setStats] = useState<AdminStats>(EMPTY_STATS);
   const [pendingKycCount, setPendingKycCount] = useState(0);
   const [quotes, setQuotes] = useState<RecentQuote[]>([]);
@@ -79,16 +78,11 @@ export default function GlobalDashboard() {
 
   const currentDate = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
 
-  const loadDashboard = useCallback(async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    else setLoading(true);
-    
-    setErrors(EMPTY_ERRORS);
+  // Read once per mount: the session cannot change without a full navigation.
+  const [currentUser] = useState(() => getCurrentUser() as CurrentUser | null);
 
+  const loadDashboard = useCallback(async () => {
     try {
-      const currentUser = getCurrentUser() as CurrentUser | null;
-      setAdminName(currentUser?.name?.trim() || 'Administrador');
-
       const [statsResult, kycResult, quotesResult] = await Promise.allSettled([
         adminDashboardApi.getStats(), adminDashboardApi.getPendingKyc(), adminDashboardApi.getQuotes(),
       ]);
@@ -130,6 +124,8 @@ export default function GlobalDashboard() {
     }
   }, []);
 
+  const refresh = () => { setRefreshing(true); void loadDashboard(); };
+
   useEffect(() => { void loadDashboard(); }, [loadDashboard]);
 
   return (
@@ -139,10 +135,10 @@ export default function GlobalDashboard() {
           <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-[#7a2fbf]">
             <span className="h-2 w-2 rounded-full bg-[#7a2fbf]" /> TASKPRO · ADMINISTRACIÓN
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">¡Bienvenido, {adminName}!</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">¡Bienvenido, {currentUser?.name?.trim() || 'Administrador'}!</h1>
           <p className="mt-2 flex items-center gap-2 text-sm capitalize text-gray-500"><CalendarDays className="h-4 w-4" />{currentDate}</p>
         </div>
-        <button type="button" onClick={() => void loadDashboard(true)} disabled={loading || refreshing} className="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-purple-200 hover:text-[#7a2fbf] disabled:cursor-not-allowed disabled:opacity-50 lg:self-auto">
+        <button type="button" onClick={refresh} disabled={loading || refreshing} className="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-purple-200 hover:text-[#7a2fbf] disabled:cursor-not-allowed disabled:opacity-50 lg:self-auto">
           <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />{refreshing ? 'Actualizando...' : 'Actualizar datos'}
         </button>
       </header>

@@ -1,0 +1,38 @@
+# Netlify configuration.
+#
+# This repo is connected to Netlify for pull-request deploy previews, while
+# Railway (see railway.json) serves the production deployment. Keeping this file
+# in version control means the preview settings no longer live only in the
+# Netlify UI. See DEPLOY.md.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Must satisfy package.json#engines and what vite@8 supports.
+  NODE_VERSION = "22"
+
+# SPA fallback: /quotes, /checkout/:id, /tracking ... must serve index.html on a
+# hard refresh. Replaces the previous public/_redirects file.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Hashed assets are immutable; everything else stays revalidated.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

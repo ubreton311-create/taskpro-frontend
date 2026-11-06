@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Users, Mail, CalendarDays, RefreshCw, Search, UserRound, AlertCircle } from 'lucide-react';
 import { adminApi } from '../services/adminApi';
 
@@ -25,27 +25,39 @@ function formatDate(date: string): string {
   return new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }).format(parsedDate);
 }
 
+const CLIENTS_ERROR = 'No se pudieron cargar los clientes.';
+
+/** GET /users — resolves with the CLIENT-role users only. */
+async function fetchClients(): Promise<Client[]> {
+  const response = await adminApi.getUsers();
+  return extractUsers(response).filter((user) => user.role === 'CLIENT');
+}
+
 export default function ClientsView() {
   const [clients, setClients] = useState<Client[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchClients = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await adminApi.getUsers();
-      const users = extractUsers(response);
-      setClients(users.filter((user) => user.role === 'CLIENT'));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudieron cargar los clientes.');
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    let active = true;
+    fetchClients()
+      .then((data) => { if (active) setClients(data); })
+      .catch((err: unknown) => {
+        if (active) setError(err instanceof Error ? err.message : CLIENTS_ERROR);
+      })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, []);
 
-  useEffect(() => { void fetchClients(); }, [fetchClients]);
+  const refresh = () => {
+    setLoading(true);
+    setError(null);
+    void fetchClients()
+      .then(setClients)
+      .catch((err: unknown) => setError(err instanceof Error ? err.message : CLIENTS_ERROR))
+      .finally(() => setLoading(false));
+  };
 
   const filteredClients = clients.filter((client) => {
     const query = search.toLowerCase().trim();
@@ -62,7 +74,7 @@ export default function ClientsView() {
             <p className="mt-1 text-sm text-gray-500">Administra los usuarios registrados en TaskPro.</p>
           </div>
         </div>
-        <button onClick={() => void fetchClients()} disabled={loading} className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+        <button onClick={refresh} disabled={loading} className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50">
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Actualizar
         </button>
       </div>
