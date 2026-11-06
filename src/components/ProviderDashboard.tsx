@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getErrorMessage } from '../utils/errors';
 import {
   BriefcaseBusiness,
   Wallet,
@@ -65,8 +66,8 @@ export default function ProviderDashboard({
 
     try {
       await onComplete(order);
-    } catch (err: any) {
-      setError(err.message || "No fue posible completar la orden.");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "No fue posible completar la orden."));
     } finally {
       setCompletingId(null);
     }

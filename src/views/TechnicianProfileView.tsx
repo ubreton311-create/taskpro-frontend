@@ -2,7 +2,19 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Star, MapPin, CheckCircle2, ShieldCheck, CalendarDays, Clock } from "lucide-react";
 
 // Datos de respaldo en lo que conectas el endpoint GET /technicians/:id
-const techniciansData: Record<string, any> = {
+interface Technician {
+  name: string;
+  specialty: string;
+  rating: number;
+  reviews: number;
+  distance: number;
+  available: boolean;
+  initials: string;
+  bio: string;
+  services: string[];
+}
+
+const techniciansData: Record<string, Technician> = {
   "tech-1": { name: "Carlos Méndez", specialty: "Plomería", rating: 4.9, reviews: 245, distance: 1.2, available: true, initials: "CM", bio: "Plomero certificado con más de 10 años de experiencia en reparación de fugas, instalación de tuberías y mantenimiento general.", services: ["Reparación de fugas", "Destape de drenajes", "Instalación de muebles de baño"] },
   "tech-2": { name: "Ana Rodríguez", specialty: "Electricidad", rating: 4.8, reviews: 189, distance: 2.5, available: true, initials: "AR", bio: "Ingeniera eléctrica especializada en instalaciones residenciales, tableros de control y reparación de cortocircuitos.", services: ["Instalación de luminarias", "Reparación de tableros", "Cableado estructurado"] },
   "tech-3": { name: "Miguel Torres", specialty: "Reparaciones", rating: 4.7, reviews: 167, distance: 3.8, available: false, initials: "MT", bio: "Técnico en mantenimiento general. Experto en carpintería ligera, pintura y ajustes del hogar.", services: ["Reparación de muebles", "Pintura", "Mantenimiento preventivo"] },
@@ -53,7 +65,7 @@ export default function TechnicianProfileView() {
                 <div>
                   <h2 className="text-xl font-black text-[#1a1a1a]">Servicios que ofrece</h2>
                   <ul className="mt-3 space-y-2">
-                    {tech.services.map((service: string, idx: number) => (
+                    {tech.services.map((service, idx) => (
                       <li key={idx} className="flex items-center gap-2 text-sm font-medium text-gray-700">
                         <CheckCircle2 size={18} className="text-green-500" /> {service}
                       </li>

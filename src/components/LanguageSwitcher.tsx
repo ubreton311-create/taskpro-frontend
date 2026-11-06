@@ -1,5 +1,5 @@
 import { Globe, ChevronDown } from "lucide-react";
-import { useTranslation } from "../i18n/i18n"; // Vite resuelve el .tsx automáticamente
+import { useTranslation } from "../i18n/useTranslation"; // Vite resuelve el .tsx automáticamente
 
 export default function LanguageSwitcher() {
   const { language, setLanguage, t } = useTranslation();

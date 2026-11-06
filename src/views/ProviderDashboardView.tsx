@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertCircle, LoaderCircle } from "lucide-react";
 import ProviderDashboard, { type JobOrder } from "../components/ProviderDashboard";
 import ReviewModal from "../components/ReviewModal";
 import { getCurrentUser } from "../utils/auth";
 import { API_URL } from '../services/config';
+import { getErrorMessage, getApiErrorMessage } from '../utils/errors';
+import type { ApiQuote } from '../types/api.types';
 
 
 function getAuthHeaders(): HeadersInit {
@@ -12,8 +14,16 @@ function getAuthHeaders(): HeadersInit {
   return { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 }
 
+/** GET /quotes — resolves with the quotes assigned to the signed-in provider. */
+async function fetchProviderQuotes(): Promise<ApiQuote[]> {
+  const response = await fetch(`${API_URL}/quotes`, { headers: getAuthHeaders() });
+  const data = await response.json();
+  if (!response.ok) throw new Error(getApiErrorMessage(data, "Error al cargar solicitudes."), { cause: data });
+  return Array.isArray(data) ? (data as ApiQuote[]) : [];
+}
+
 export default function ProviderDashboardView() {
-  const [quotes, setQuotes] = useState<any[]>([]);
+  const [quotes, setQuotes] = useState<ApiQuote[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [reviewTarget, setReviewTarget] = useState<JobOrder | null>(null);
@@ -21,21 +31,14 @@ export default function ProviderDashboardView() {
   const user = getCurrentUser();
 
   // 1. Cargar las cotizaciones (Solicitudes) de los clientes
-  const loadQuotes = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_URL}/quotes`, { headers: getAuthHeaders() });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data?.message || "Error al cargar solicitudes.");
-      setQuotes(Array.isArray(data) ? data : []);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    let active = true;
+    fetchProviderQuotes()
+      .then((data) => { if (active) setQuotes(data); })
+      .catch((err: unknown) => { if (active) setError(getErrorMessage(err)); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, []);
-
-  useEffect(() => { loadQuotes(); }, [loadQuotes]);
 
   // 2. Mapear los datos de Prisma (Quote) a la interfaz visual (JobOrder)
   const orders: JobOrder[] = useMemo(() => {
@@ -44,7 +47,7 @@ export default function ProviderDashboardView() {
       clientName: q.client?.name || "Cliente",
       serviceName: q.service?.name || "Servicio solicitado",
       address: q.address || "Dirección pendiente",
-      scheduledDate: q.scheduledDate,
+      scheduledDate: q.scheduledDate ?? "",
       amount: Number(q.totalAmount),
       status: q.status as JobOrder["status"],
       pdfUrl: typeof q.pdfUrl === "string" ? q.pdfUrl : undefined,
@@ -73,8 +76,8 @@ export default function ProviderDashboardView() {
       
       // Actualizamos la vista local
       setQuotes((prev) => prev.map((q) => q.id === order.id ? { ...q, status: "CONFIRMED" } : q));
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(getErrorMessage(err));
     }
   };
 

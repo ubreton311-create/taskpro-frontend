@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { Users, BriefcaseBusiness, DollarSign, Clock, FileText, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { adminDashboardApi } from "../../services/adminDashboardApi";
 import { getCurrentUser } from "../../utils/auth";
 import { API_URL } from '../../services/config';
+import { getErrorMessage } from '../../utils/errors';
+import { adminDashboardApi, type AdminStats, type RecentQuote } from '../../services/adminDashboardApi';
 
 export default function GlobalDashboard() {
   const navigate = useNavigate();
   const user = getCurrentUser();
-  const [stats, setStats] = useState<any>(null);
-  const [quotes, setQuotes] = useState<any[]>([]);
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [quotes, setQuotes] = useState<RecentQuote[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -28,9 +29,9 @@ export default function GlobalDashboard() {
         ]);
 
         setStats(statsRes);
-        setQuotes(Array.isArray(quotesRes) ? quotesRes.slice(0, 5) : []);
-      } catch (err: any) {
-        setError(err.message || "No se pudo cargar el dashboard.");
+        setQuotes(Array.isArray(quotesRes) ? (quotesRes as RecentQuote[]).slice(0, 5) : []);
+      } catch (err: unknown) {
+        setError(getErrorMessage(err, "No se pudo cargar el dashboard."));
       } finally {
         setLoading(false);
       }
@@ -98,14 +99,14 @@ export default function GlobalDashboard() {
               <tbody className="divide-y divide-[#F0EDF4]">
                 {quotes.map((q) => (
                   <tr key={q.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 font-semibold text-[#252136]">{q.service?.name || "Servicio"}</td>
+                    <td className="px-6 py-4 font-semibold text-[#252136]">{q.service?.title || "Servicio"}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{q.provider?.name || "Por asignar"}</td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-bold ${q.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600' : 'bg-purple-50 text-purple-600'}`}>
                         {q.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right font-bold text-[#252136]">${Number(q.totalAmount || 0).toFixed(2)}</td>
+                    <td className="px-6 py-4 text-right font-bold text-[#252136]">${Number(q.amount || 0).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>

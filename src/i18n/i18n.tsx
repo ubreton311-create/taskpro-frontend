@@ -1,13 +1,7 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { I18nContext, type Language } from "./i18nContext";
 
-export type Language = "es" | "en";
+export type { Language } from "./i18nContext";
 type TranslationDictionary = { [key: string]: string };
 
 const translations: Record<Language, TranslationDictionary> = {
@@ -26,14 +20,6 @@ const translations: Record<Language, TranslationDictionary> = {
     "language.label": "Language",
   },
 };
-
-type I18nContextValue = {
-  language: Language;
-  setLanguage: (lang: Language) => void;
-  t: (key: string, params?: Record<string, string | number>) => string;
-};
-
-const I18nContext = createContext<I18nContextValue | undefined>(undefined);
 
 function getInitialLanguage(): Language {
   const saved = localStorage.getItem("taskpro-language");
@@ -72,10 +58,4 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       {children}
     </I18nContext.Provider>
   );
-}
-
-export function useTranslation() {
-  const context = useContext(I18nContext);
-  if (!context) throw new Error("useTranslation must be used inside I18nProvider");
-  return context;
 }

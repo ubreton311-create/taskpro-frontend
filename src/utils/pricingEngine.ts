@@ -29,44 +29,62 @@ export const PRICING_RULES = {
   }
 };
 
-export function calculateEstimate(serviceType: string, details: any, country: 'USA' | 'MX' = 'USA') {
-  let total = 0;
-  const isUSA = country === 'USA';
-  const rules: any = PRICING_RULES[serviceType as keyof typeof PRICING_RULES];
+type PriceRule = {
+  baseUSA: number;
+  baseMX: number;
+  perRoomUSA?: number;
+  perRoomMX?: number;
+  perBathroomUSA?: number;
+  perBathroomMX?: number;
+  perSqFtUSA?: number;
+  perSqFtMX?: number;
+  perHourUSA?: number;
+  perHourMX?: number;
+  extrasUSA?: Record<string, number>;
+  extrasMX?: Record<string, number>;
+};
 
+/** Answers collected by the quote form; every key is optional. */
+type PricingDetails = Record<string, number | string | boolean | undefined>;
+
+export function calculateEstimate(
+  serviceType: string,
+  details: PricingDetails,
+  country: 'USA' | 'MX' = 'USA',
+): number {
+  const rules: PriceRule | undefined = PRICING_RULES[serviceType as keyof typeof PRICING_RULES];
   if (!rules) return 0;
 
-  // Sumar base
-  total += isUSA ? rules.baseUSA : rules.baseMX;
+  const isUSA = country === 'USA';
+  const pick = (usa?: number, mx?: number): number => (isUSA ? usa : mx) ?? 0;
+  const extra = (key: string): number =>
+    (isUSA ? rules.extrasUSA?.[key] : rules.extrasMX?.[key]) ?? 0;
+  const has = (key: string): boolean => Boolean(details[key]);
 
-  // Lógica específica por servicio
+  let total = isUSA ? rules.baseUSA : rules.baseMX;
+
   if (serviceType === 'cleaning') {
-    total += (Number(details.rooms) || 0) * (isUSA ? rules.perRoomUSA : rules.perRoomMX);
-    total += (Number(details.bathrooms) || 0) * (isUSA ? rules.perBathroomUSA : rules.perBathroomMX);
-    if (details.fridge) total += isUSA ? rules.extrasUSA.fridge : rules.extrasMX.fridge;
-    if (details.oven) total += isUSA ? rules.extrasUSA.oven : rules.extrasMX.oven;
-    if (details.windows) total += isUSA ? rules.extrasUSA.windows : rules.extrasMX.windows;
-    if (details.stairs) total += isUSA ? rules.extrasUSA.stairs : rules.extrasMX.stairs;
-    if (details.deepKitchen) total += isUSA ? rules.extrasUSA.deepKitchen : rules.extrasMX.deepKitchen;
-  } 
-  else if (serviceType === 'painting') {
-    total += (Number(details.squareFeet) || 0) * (isUSA ? rules.perSqFtUSA : rules.perSqFtMX);
-  }
-  else if (serviceType === 'plumbing') {
-    if (details.faucet) total += isUSA ? rules.extrasUSA.faucet : rules.extrasMX.faucet;
-    if (details.leak) total += isUSA ? rules.extrasUSA.leak : rules.extrasMX.leak;
-    if (details.toilet) total += isUSA ? rules.extrasUSA.toilet : rules.extrasMX.toilet;
-  }
-  else if (serviceType === 'handyman') {
+    total += (Number(details.rooms) || 0) * pick(rules.perRoomUSA, rules.perRoomMX);
+    total += (Number(details.bathrooms) || 0) * pick(rules.perBathroomUSA, rules.perBathroomMX);
+    for (const key of ['fridge', 'oven', 'windows', 'stairs', 'deepKitchen']) {
+      if (has(key)) total += extra(key);
+    }
+  } else if (serviceType === 'painting') {
+    total += (Number(details.squareFeet) || 0) * pick(rules.perSqFtUSA, rules.perSqFtMX);
+  } else if (serviceType === 'plumbing') {
+    for (const key of ['faucet', 'leak', 'toilet']) {
+      if (has(key)) total += extra(key);
+    }
+  } else if (serviceType === 'handyman') {
     const hours = Number(details.hours) || 1;
-    total += hours * (isUSA ? rules.perHourUSA : rules.perHourMX);
-    if (details.weldDoor) total += isUSA ? rules.extrasUSA.weldDoor : rules.extrasMX.weldDoor;
-    if (details.buildFurniture) total += isUSA ? rules.extrasUSA.buildFurniture : rules.extrasMX.buildFurniture;
-    if (details.repairFurniture) total += isUSA ? rules.extrasUSA.repairFurniture : rules.extrasMX.repairFurniture;
-  }
-  else if (serviceType === 'hvac') {
-    if (details.miniSplitClean) total += isUSA ? rules.extrasUSA.miniSplitClean : rules.extrasMX.miniSplitClean;
-    if (details.ductClean) total += isUSA ? rules.extrasUSA.ductClean : rules.extrasMX.ductClean;
+    total += hours * pick(rules.perHourUSA, rules.perHourMX);
+    for (const key of ['weldDoor', 'buildFurniture', 'repairFurniture']) {
+      if (has(key)) total += extra(key);
+    }
+  } else if (serviceType === 'hvac') {
+    for (const key of ['miniSplitClean', 'ductClean']) {
+      if (has(key)) total += extra(key);
+    }
   }
 
   return total;

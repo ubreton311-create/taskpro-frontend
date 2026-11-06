@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import AdminDashboard from '../components/admin/AdminDashboard';
 import type { AdminStats, KycProvider } from '../types/admin';
 import { API_URL } from '../services/config';
+import { getErrorMessage } from '../utils/errors';
 
 
 async function apiRequest<T>(path: string, token: string, init?: RequestInit): Promise<T> {
@@ -41,7 +42,7 @@ export default function AdminDashboardView() {
     async function load() {
       setLoading(true);
       try { if (!token) throw new Error('Debes iniciar sesión.'); await refresh(); } 
-      catch (err: any) { if (active) setError(err.message); } 
+      catch (err: unknown) { if (active) setError(getErrorMessage(err)); } 
       finally { if (active) setLoading(false); }
     }
     void load();

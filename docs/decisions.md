@@ -118,3 +118,29 @@ written down. Both hosts are real; both are now described in the repo.
 other. `public/_redirects` was replaced by the redirect in `netlify.toml` so SPA
 routing has a single source per host (`netlify.toml` for Netlify, `serve.mjs`
 for Railway).
+
+---
+
+## D-008 — Lint is a merge gate, and CI builds with a placeholder API URL
+
+**Date:** 2026-11-05 · **Status:** accepted
+
+`npm run lint` must exit 0 and runs in CI before the build. The lint baseline
+(60 errors: 37 `no-explicit-any`, 9 `set-state-in-effect`, 9
+`only-export-components`, 4 `no-unused-vars`, 1 `preserve-caught-error`) was
+burned down to zero rather than silenced, because a permanently red linter
+trains everyone to ignore it.
+
+**Rationale:** a linter with no gate is documentation nobody runs; a linter that
+is red on `main` cannot distinguish a new violation from the existing backlog.
+
+**Consequence:** CI sets `VITE_API_URL=https://api.example.com` for the build
+step only — the build must succeed without real credentials, and D-006 means the
+variable cannot be omitted. New violations fail the PR. Making the check
+*required* on `main` is a repository setting, not something a commit can do.
+
+Three structural changes came out of the same rule set: the route components
+moved from `main.tsx` to `src/App.tsx`, the i18n hook moved to
+`src/i18n/useTranslation.ts`, and data loading became cancellable
+`fetch → .then(...)` chains instead of `useEffect(() => { load(); }, [load])`,
+which also removed a race where a late response could overwrite newer state.

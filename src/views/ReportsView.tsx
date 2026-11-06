@@ -2,10 +2,11 @@ import { useEffect, useState, useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { TrendingUp, DollarSign, CheckCircle2 } from "lucide-react";
 import { API_URL } from '../services/config';
+import type { ApiQuote } from '../types/api.types';
 
 
 export default function ReportsView() {
-  const [quotes, setQuotes] = useState<any[]>([]);
+  const [quotes, setQuotes] = useState<ApiQuote[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,7 +16,7 @@ export default function ReportsView() {
         const res = await fetch(`${API_URL}/quotes`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        if (res.ok) setQuotes(await res.json());
+        if (res.ok) setQuotes((await res.json()) as ApiQuote[]);
       } catch (error) {
         console.error(error);
       } finally {
@@ -28,7 +29,7 @@ export default function ReportsView() {
   // Procesar datos reales para el gráfico
   const chartData = useMemo(() => {
     const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-    const dataMap = new Map();
+    const dataMap = new Map<string, number>();
 
     quotes.filter(q => q.status === 'COMPLETED').forEach(q => {
       const date = new Date(q.createdAt);
@@ -36,7 +37,7 @@ export default function ReportsView() {
       const revenue = Number(q.totalAmount) * 0.15; // Comisión del 15%
       
       if (dataMap.has(month)) {
-        dataMap.set(month, dataMap.get(month) + revenue);
+        dataMap.set(month, (dataMap.get(month) ?? 0) + revenue);
       } else {
         dataMap.set(month, revenue);
       }
