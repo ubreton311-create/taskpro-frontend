@@ -78,3 +78,43 @@ optional step.
 **Consequence:** a change that fixes behaviour but leaves the build red is not
 done. Lowering `strict`/`noUnusedLocals`, adding `// @ts-nocheck`, or dropping
 `tsc -b` from `build` is a Blocker per the AGENTS.md checklist (SEC-03).
+
+---
+
+## D-006 — A missing `VITE_API_URL` fails the build
+
+**Date:** 2026-11-06 · **Status:** accepted
+
+`VITE_API_URL` is mandatory for production builds. There is no silent
+`localhost` fallback outside development: `vite.config.ts` refuses to build
+without it, and `src/services/config.ts` is the only module that reads it.
+
+**Rationale:** the previous fallback turned a missing environment variable into a
+deployed bundle that called `http://localhost:3000` from the user's browser. That
+is indistinguishable from an unrelated outage and costs a full debugging cycle.
+A build that stops with "VITE_API_URL is not set" is cheaper than a deploy that
+looks successful and is broken.
+
+**Consequence:** every build environment (Railway, Netlify, CI) must define the
+variable. Local development keeps the `http://localhost:3000` fallback so `npm
+run dev` works with no setup.
+
+---
+
+## D-007 — Railway is production; Netlify is preview-only
+
+**Date:** 2026-11-06 · **Status:** accepted
+
+Production is the Railway service described by `railway.json` (`npm ci && npm
+run build`, `node scripts/serve.mjs`, healthcheck `/healthz`). Netlify stays
+connected for pull-request deploy previews and is configured by `netlify.toml`.
+
+**Rationale:** the repo previously contained `public/_redirects` (a Netlify-only
+file) with no `netlify.toml`, while `DEPLOY.md` described Railway — so the
+"which deployment failed?" question had two possible answers and neither was
+written down. Both hosts are real; both are now described in the repo.
+
+**Consequence:** a fix verified on one host is not automatically verified on the
+other. `public/_redirects` was replaced by the redirect in `netlify.toml` so SPA
+routing has a single source per host (`netlify.toml` for Netlify, `serve.mjs`
+for Railway).
