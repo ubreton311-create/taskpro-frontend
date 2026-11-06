@@ -35,6 +35,7 @@ export interface ProviderDashboardProps {
   orders: JobOrder[];
   onViewPdf: (order: JobOrder) => void;
   onComplete: (order: JobOrder) => Promise<void> | void;
+  onAccept?: (order: JobOrder) => Promise<void> | void;
 }
 
 const money = (amount: number): string =>
@@ -52,6 +53,7 @@ export default function ProviderDashboard({
   orders,
   onViewPdf,
   onComplete,
+  onAccept,
 }: ProviderDashboardProps) {
   const [completingId, setCompletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -244,6 +246,16 @@ export default function ProviderDashboard({
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: "10px" }}>
+                    {onAccept && order.status === "PENDING" && (
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => onAccept(order)}
+                        disabled={completingId === order.id}
+                      >
+                        <CheckCircle2 size={16} />
+                        Aceptar
+                      </button>
+                    )}
                     <button
                       className="btn btn-secondary"
                       onClick={() => onViewPdf(order)}

@@ -2,10 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, CalendarDays, Clock3, UserRound, ShieldCheck, CheckCircle2,
-  Loader2, Wallet, Sparkles, AlertCircle, Upload, Home, Paintbrush,
-  Droplets, Zap, Snowflake, PawPrint, Baby, Stethoscope, Package, Sofa,
-  Bath, Wrench, Hammer, Key, Trees, HeartPulse, Truck, Tv, Refrigerator,
-  Settings, Shirt, Wind, Bug, Lock, GlassWater, BadgeCheck
+  Loader2, Wallet, Sparkles, AlertCircle, Upload, Zap, PawPrint, Baby, Package, Sofa,
+  Bath, Wrench, Trees, HeartPulse, BadgeCheck
 } from "lucide-react";
 
 // --------------------------------------------------

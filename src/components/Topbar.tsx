@@ -2,10 +2,8 @@ import { getCurrentUser } from "../utils/auth";
 import { Bell, Search, ChevronDown } from "lucide-react";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useLocation } from "react-router-dom";
-import { useTranslation } from "../i18n/i18n";
 
 export default function Topbar() {
-  const { t } = useTranslation();
   const user = getCurrentUser();
   const location = useLocation();
   

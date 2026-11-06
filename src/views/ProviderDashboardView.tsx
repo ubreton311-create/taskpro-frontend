@@ -46,8 +46,8 @@ export default function ProviderDashboardView() {
       address: q.address || "Dirección pendiente",
       scheduledDate: q.scheduledDate,
       amount: Number(q.totalAmount),
-      status: q.status, 
-      pdfUrl: null,
+      status: q.status as JobOrder["status"],
+      pdfUrl: typeof q.pdfUrl === "string" ? q.pdfUrl : undefined,
     }));
   }, [quotes]);
 
@@ -78,8 +78,26 @@ export default function ProviderDashboardView() {
     }
   };
 
-  const handleReviewSubmit = async (rating: number, comment: string) => {
-    console.log("Reseña visual (Proveedor):", { quoteId: reviewTarget?.id, rating, comment });
+  const handleReviewSubmit = async ({
+    bookingId,
+    rating,
+    comment,
+  }: {
+    bookingId: string;
+    rating: number;
+    comment: string;
+  }) => {
+    const response = await fetch(`${API_URL}/reviews`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ bookingId, rating, comment }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      throw new Error(data?.message || "No fue posible registrar la reseña.");
+    }
+
     setReviewTarget(null);
   };
 
@@ -100,7 +118,9 @@ export default function ProviderDashboardView() {
       />
       <ReviewModal
         isOpen={Boolean(reviewTarget)}
-        providerName={reviewTarget?.clientName || "Cliente"}
+        targetName={reviewTarget?.clientName || "Cliente"}
+        targetRole="CLIENT"
+        bookingId={reviewTarget?.id ?? ""}
         onClose={() => setReviewTarget(null)}
         onSubmit={handleReviewSubmit}
       />

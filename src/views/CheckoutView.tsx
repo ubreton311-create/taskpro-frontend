@@ -11,6 +11,8 @@ interface QuoteData {
   commissionAmount: number | string;
   totalAmount: number | string;
   scheduledDate?: string;
+  title?: string;
+  service?: { name?: string; description?: string };
 }
 
 function getAuthHeaders(): HeadersInit {
@@ -139,9 +141,9 @@ export default function CheckoutView() {
     <main className="min-h-screen bg-[#f8f9fc] px-4 py-10">
       <div className="mx-auto max-w-5xl">
         <CheckoutStep
+          serviceName={quote.service?.name ?? quote.title ?? "Servicio TaskPro"}
           subtotal={Number(quote.subtotal || 0)}
           commission={Number(quote.commissionAmount || 0)}
-          total={Number(quote.totalAmount || 0)}
           onPay={handlePay}
         />
       </div>

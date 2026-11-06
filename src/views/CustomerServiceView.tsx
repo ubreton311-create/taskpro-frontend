@@ -406,7 +406,7 @@ export default function CustomerServiceView() {
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-gray-500 sm:text-base">Creamos una plataforma pensada para conectar personas con servicios de forma sencilla, confiable y transparente.</p>
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {benefits.map((benefit, index) => {
+            {benefits.map((benefit) => {
               const Icon = benefit.icon;
               return (
                 <article key={benefit.title} className="group relative overflow-hidden rounded-2xl border border-purple-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-purple-200 hover:shadow-xl hover:shadow-purple-950/10">

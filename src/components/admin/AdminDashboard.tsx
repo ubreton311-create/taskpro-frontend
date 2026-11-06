@@ -13,14 +13,6 @@ interface AdminDashboardProps {
 
 type DocumentKey = 'ine' | 'selfie' | 'proofOfAddress';
 
-const COLORS = {
-  primary: '#7A2FBF',
-  primaryDark: '#64239F',
-  background: '#F8F9FC',
-  text: '#252136',
-  secondary: '#777386',
-};
-
 function formatCurrency(amount: number, currency = 'MXN') {
   return new Intl.NumberFormat('es-MX', {
     style: 'currency',

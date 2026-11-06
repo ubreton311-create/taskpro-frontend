@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, Wallet, CalendarDays, BriefcaseBusiness, ArrowRight, Clock, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
+import { LayoutDashboard, Wallet, CalendarDays, BriefcaseBusiness, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { clientApi } from '../../services/clientApi';
 import type { Quote, Booking, QuoteStatus } from '../../types/client.types';
 

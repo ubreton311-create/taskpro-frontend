@@ -29,13 +29,6 @@ function formatCurrency(value: number | string): string {
   return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 2 }).format(amount);
 }
 
-function formatDate(date?: string): string {
-  if (!date) return 'Sin fecha';
-  const parsed = new Date(date);
-  if (Number.isNaN(parsed.getTime())) return 'Fecha no disponible';
-  return new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }).format(parsed);
-}
-
 function getStatusStyle(status: string): string {
   switch (status.toUpperCase()) {
     case 'PENDING': return 'bg-amber-50 text-amber-700 ring-amber-200';

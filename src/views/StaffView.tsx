@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, Mail, Phone, BriefcaseBusiness, ShieldCheck, Clock } from "lucide-react";
+import { Mail, Phone, BriefcaseBusiness, ShieldCheck } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 

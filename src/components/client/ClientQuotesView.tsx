@@ -86,8 +86,9 @@ export default function ClientQuotesView({
 
   const filteredQuotes = useMemo(() => {
     return quotes.filter((quote) => {
+      const quoteTitle = quote.title ?? quote.service?.name ?? '';
       const matchesSearch =
-        quote.title.toLowerCase().includes(search.toLowerCase()) ||
+        quoteTitle.toLowerCase().includes(search.toLowerCase()) ||
         (quote.provider?.name || '')
           .toLowerCase()
           .includes(search.toLowerCase());
@@ -231,7 +232,7 @@ export default function ClientQuotesView({
                   >
                     <td className="px-6 py-5">
                       <p className="font-semibold text-gray-800">
-                        {quote.title}
+                        {quote.title ?? quote.service?.name ?? 'Servicio'}
                       </p>
 
                       <p className="mt-1 text-xs text-gray-400">
@@ -250,7 +251,7 @@ export default function ClientQuotesView({
                     </td>
 
                     <td className="whitespace-nowrap px-6 py-5 font-bold text-gray-800">
-                      {currency(quote.amount)}
+                      {currency(quote.amount ?? quote.totalAmount ?? 0)}
                     </td>
 
                     <td className="px-6 py-5">
