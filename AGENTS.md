@@ -26,7 +26,6 @@ src/
   services/             API clients (one fetch wrapper per domain)
   context/              React contexts
   utils/                auth + pricing helpers
-  schemas/              per-trade service form schemas
   styles/               global stylesheet
   types/                shared TypeScript types
 ```
