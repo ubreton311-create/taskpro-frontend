@@ -14,7 +14,7 @@ import { extname, resolve, sep } from "node:path";
 
 const ROOT = resolve(process.cwd(), "dist");
 const INDEX = resolve(ROOT, "index.html");
-const PORT = Number(process.env.PORT ?? 4173);
+const PORT = Number(process.env.PORT) || 4173;
 const HOST = process.env.HOST ?? "0.0.0.0";
 
 const MIME = {
@@ -39,6 +39,9 @@ const MIME = {
   ".webmanifest": "application/manifest+json",
   ".pdf": "application/pdf",
 };
+
+// Extensiones que jamás deben caer al fallback SPA: si el archivo no existe, es un 404 real.
+const STATIC_EXTENSIONS = new Set(Object.keys(MIME));
 
 if (!existsSync(INDEX)) {
   console.error(
@@ -78,12 +81,19 @@ const server = createServer((req, res) => {
     return;
   }
 
-  const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+  // Base fija y sin datos del cliente: un Host manipulado no puede provocar ERR_INVALID_URL.
+  // URL malformada y decodificación fallida se tratan igual: 400, nunca una excepción sin capturar.
   let pathname;
   try {
-    pathname = decodeURIComponent(url.pathname);
+    pathname = decodeURIComponent(new URL(req.url ?? "/", "http://localhost").pathname);
   } catch {
-    res.writeHead(400).end("Bad Request");
+    res.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" }).end("Bad Request");
+    return;
+  }
+
+  // NUL y otros bytes de control rompen las APIs de fs (ERR_INVALID_ARG_VALUE).
+  if (pathname.includes("\0")) {
+    res.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" }).end("Bad Request");
     return;
   }
 
@@ -101,7 +111,17 @@ const server = createServer((req, res) => {
     return;
   }
 
-  // Fallback SPA: la respuesta siempre es 200 para no romper el router del cliente.
+  // Un asset que no existe es un 404, no el index.html: devolver HTML con 200 en
+  // /assets/*.js solo provoca errores crípticos de MIME en el navegador.
+  const ext = extname(pathname).toLowerCase();
+  if (pathname.startsWith("/assets/") || STATIC_EXTENSIONS.has(ext)) {
+    res
+      .writeHead(404, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-cache" })
+      .end("Not Found");
+    return;
+  }
+
+  // Fallback SPA: solo para rutas de la aplicación (/quotes, /checkout/123, ...).
   sendFile(res, INDEX);
 });
 

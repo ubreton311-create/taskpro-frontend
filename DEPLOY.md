@@ -77,7 +77,7 @@ antes de volver a desplegar.
 | Archivo | Para qué sirve |
 | --- | --- |
 | `railway.json` | Fija el builder (`NIXPACKS`), el **Build Command** (`npm ci && npm run build`), el **Start Command** (`node scripts/serve.mjs`) y el **healthcheck** en `/healthz`. Railway lo lee solo: dejas de depender de lo que tengas escrito a mano en el panel. |
-| `scripts/serve.mjs` | Servidor estático de producción **sin dependencias extra**: sirve `dist/`, hace *fallback* SPA (recargar `/quotes` o `/checkout/123` ya no da 404), expone `/healthz`, escucha en `0.0.0.0:$PORT` y cachea los assets con hash. |
+| `scripts/serve.mjs` | Servidor estático de producción **sin dependencias extra**: sirve `dist/`, hace *fallback* SPA solo en rutas de la app (recargar `/quotes` o `/checkout/123` ya no da 404), devuelve **404 real** si un asset de `/assets/` o un archivo con extensión estática no existe, responde **400** a URLs malformadas o con byte NUL en lugar de tumbar el proceso, expone `/healthz`, escucha en `0.0.0.0:$PORT` y cachea los assets con hash. |
 | `package.json` | Nuevos scripts `start` (producción) y `typecheck`, más `engines.node`. |
 | `.nvmrc` | Node 22, la misma versión con la que se validó el build. |
 | `.env.example` | Documenta `VITE_API_URL` y `VITE_GOOGLE_CLIENT_ID`. |
