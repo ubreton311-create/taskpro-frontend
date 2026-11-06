@@ -183,6 +183,9 @@ Para el backend, la ruta de diagnóstico es idéntica:
 
 ## 8. Entorno y hosts: quién construye qué
 
+> Guía completa de variables por entorno (local, producción, preview, CI),
+> verificación y solución de problemas: **[`docs/environment.md`](docs/environment.md)**.
+
 ### 8.1 Variables obligatorias
 
 | Variable | Obligatoria | Efecto si falta |
