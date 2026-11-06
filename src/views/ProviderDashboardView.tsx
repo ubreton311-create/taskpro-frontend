@@ -3,8 +3,8 @@ import { AlertCircle, LoaderCircle } from "lucide-react";
 import ProviderDashboard, { type JobOrder } from "../components/ProviderDashboard";
 import ReviewModal from "../components/ReviewModal";
 import { getCurrentUser } from "../utils/auth";
+import { API_URL } from '../services/config';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem("token");
@@ -110,7 +110,6 @@ export default function ProviderDashboardView() {
         providerName={user?.name || "Proveedor"}
         pendingJobs={pendingJobs}
         commissionsPaid={commissionsPaid}
-        averageRating={4.8}
         orders={orders}
         onAccept={handleAccept} // Nueva función para aceptar trabajos
         onComplete={(order) => setReviewTarget(order)}

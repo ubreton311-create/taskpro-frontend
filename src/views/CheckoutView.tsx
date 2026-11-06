@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AlertCircle, LoaderCircle, ArrowLeft } from "lucide-react";
 import CheckoutStep from "../components/CheckoutStep";
+import { API_URL } from '../services/config';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 interface QuoteData {
   id: string;
@@ -11,6 +11,9 @@ interface QuoteData {
   commissionAmount: number | string;
   totalAmount: number | string;
   scheduledDate?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
   title?: string;
   service?: { name?: string; description?: string };
 }
@@ -69,18 +72,22 @@ export default function CheckoutView() {
 
   const handlePay = useCallback(async () => {
     if (!quoteId) throw new Error("No se encontró el ID de la cotización.");
-    
+    if (!quote) throw new Error("La cotización aún no se ha cargado.");
+    if (!quote.scheduledDate) throw new Error("La cotización no tiene una fecha agendada.");
+    if (!quote.address) throw new Error("La cotización no tiene una dirección registrada.");
+
     try {
       const response = await fetch(`${API_URL}/bookings/finalize`, {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify({
           quoteId,
-          scheduledDate: new Date(Date.now() + 86400000).toISOString(), // Mañana
+          scheduledDate: quote.scheduledDate,
           addressInfo: {
-            exactAddress: "Dirección capturada en el sistema", 
-            latitude: 32.5149,
-            longitude: -117.0382,
+            exactAddress: quote.address,
+            ...(typeof quote.latitude === "number" && typeof quote.longitude === "number"
+              ? { latitude: quote.latitude, longitude: quote.longitude }
+              : {}),
             additionalInstructions: "",
           },
         }),
@@ -98,7 +105,7 @@ export default function CheckoutView() {
     } catch (err: any) {
       throw new Error(err.message || "Error al procesar el pago.");
     }
-  }, [quoteId]);
+  }, [quoteId, quote]);
 
   if (loading) {
     return (

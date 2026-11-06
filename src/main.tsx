@@ -40,7 +40,8 @@ import ClientCheckoutView from "./components/client/ClientCheckoutView";
 import ClientBillingView from "./components/client/ClientBillingView"; 
 import GlobalDashboard from "./views/GlobalDashboard";
 
-import { getCurrentUser } from "./utils/auth"; 
+import { getCurrentUser } from "./utils/auth";
+import { GOOGLE_CLIENT_ID } from "./services/config"; 
 import "./styles/globals.css";
 
 const routeTitles: Record<string, string> = {
@@ -146,14 +147,18 @@ function App() {
   );
 }
 
-const clientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) || "dummy-client-id.apps.googleusercontent.com";
+const app = (
+  <I18nProvider>
+    <App />
+  </I18nProvider>
+);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId={clientId}>
-      <I18nProvider>
-        <App />
-      </I18nProvider>
-    </GoogleOAuthProvider>
+    {GOOGLE_CLIENT_ID ? (
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>{app}</GoogleOAuthProvider>
+    ) : (
+      app
+    )}
   </React.StrictMode>
 );

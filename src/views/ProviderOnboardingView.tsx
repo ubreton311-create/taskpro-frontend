@@ -1,10 +1,10 @@
 import { useRef, useState, type FormEvent } from 'react';
+import { API_URL } from '../services/config';
 import {
   ArrowLeft, ArrowRight, Check, CheckCircle2, MapPin,
   ShieldCheck, LoaderCircle
 } from "lucide-react";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 type CountryCode = "MX" | "US";
 type Step = 1 | 2 | 3 | 4;
@@ -317,8 +317,8 @@ export default function ProviderOnboardingView() {
                   <input className={inputClass} type="number" min="0" value={form.experienceYears} onChange={(e) => update("experienceYears", e.target.value)} />
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div><label className={labelClass}>Facebook (Opcional)</label><input className={inputClass} value={form.facebook} onChange={(e) => update("facebook", e.target.value)} placeholder="https://..." /></div>
-                  <div><label className={labelClass}>Instagram (Opcional)</label><input className={inputClass} value={form.instagram} onChange={(e) => update("instagram", e.target.value)} placeholder="https://..." /></div>
+                  <div><label className={labelClass}>Facebook (Opcional)</label><input className={inputClass} value={form.facebook} onChange={(e) => update("facebook", e.target.value)} placeholder="https://facebook.com/tu-perfil" /></div>
+                  <div><label className={labelClass}>Instagram (Opcional)</label><input className={inputClass} value={form.instagram} onChange={(e) => update("instagram", e.target.value)} placeholder="https://instagram.com/tu-perfil" /></div>
                 </div>
                 <div className={fileCardClass}>
                   <p className="text-sm font-bold mb-2">Cartas de recomendación (PDF)</p>

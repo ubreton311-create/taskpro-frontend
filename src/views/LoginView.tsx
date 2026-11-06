@@ -5,8 +5,8 @@ import {
   ShieldCheck, Sparkles, Star, Wrench, Zap,
 } from "lucide-react";
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
+import { API_URL, GOOGLE_CLIENT_ID } from '../services/config';
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 type UserRole = "ADMIN" | "PROVIDER" | "CLIENT";
 
@@ -188,27 +188,31 @@ export default function LoginView() {
               </button>
             </form>
 
-            <div className="my-7 flex items-center gap-4">
-              <div className="h-px flex-1 bg-[#E8E5EF]" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#A09BAC]">O continúa con</span>
-              <div className="h-px flex-1 bg-[#E8E5EF]" />
-            </div>
-
-            {/* BOTÓN DE GOOGLE INTEGRADO DIRECTAMENTE */}
-            <div className="relative flex min-h-[48px] w-full items-center justify-center overflow-hidden rounded-2xl border border-[#E4E1EA] bg-white transition-all hover:border-[#CFC6DB] hover:shadow-md [&>div]:!w-full [&_iframe]:!max-w-full">
-              <div className="flex w-full items-center justify-center px-2 py-2">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => setError("Google no pudo completar el inicio de sesión.")}
-                  text="signin_with"
-                  shape="rectangular"
-                  theme="outline"
-                  size="large"
-                  width="360"
-                  logo_alignment="left"
-                />
+            {GOOGLE_CLIENT_ID && (
+              <>
+              <div className="my-7 flex items-center gap-4">
+                <div className="h-px flex-1 bg-[#E8E5EF]" />
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#A09BAC]">O continúa con</span>
+                <div className="h-px flex-1 bg-[#E8E5EF]" />
               </div>
-            </div>
+
+              {/* BOTÓN DE GOOGLE INTEGRADO DIRECTAMENTE */}
+              <div className="relative flex min-h-[48px] w-full items-center justify-center overflow-hidden rounded-2xl border border-[#E4E1EA] bg-white transition-all hover:border-[#CFC6DB] hover:shadow-md [&>div]:!w-full [&_iframe]:!max-w-full">
+                <div className="flex w-full items-center justify-center px-2 py-2">
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => setError("Google no pudo completar el inicio de sesión.")}
+                    text="signin_with"
+                    shape="rectangular"
+                    theme="outline"
+                    size="large"
+                    width="360"
+                    logo_alignment="left"
+                  />
+                </div>
+              </div>
+              </>
+            )}
 
             <p className="mt-8 text-center text-sm text-[#777386]">
               ¿Todavía no tienes cuenta? <a href="/register" className="font-semibold text-[#7A2FBF] hover:underline">Crear cuenta</a>

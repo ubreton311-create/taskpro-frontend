@@ -31,7 +31,7 @@ export interface ProviderDashboardProps {
   providerName: string;
   pendingJobs: number;
   commissionsPaid: number;
-  averageRating: number;
+  averageRating?: number;
   orders: JobOrder[];
   onViewPdf: (order: JobOrder) => void;
   onComplete: (order: JobOrder) => Promise<void> | void;
@@ -132,9 +132,13 @@ export default function ProviderDashboard({
           </div>
           <p className="stat-label">Calificación Promedio</p>
           <div className="stat-value-row">
-            <span className="stat-value">{averageRating.toFixed(1)}</span>
+            <span className="stat-value">
+              {typeof averageRating === 'number' ? averageRating.toFixed(1) : '—'}
+            </span>
           </div>
-          <p className="stat-note">Opiniones de clientes</p>
+          <p className="stat-note">
+            {typeof averageRating === 'number' ? 'Opiniones de clientes' : 'Sin reseñas todavía'}
+          </p>
         </article>
       </div>
 
