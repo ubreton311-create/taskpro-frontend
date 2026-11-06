@@ -58,14 +58,12 @@ function PlaceholderPage() {
 
 function HomeRoute() {
   const user = getCurrentUser();
-  const navigate = useNavigate();
 
   if (user?.role === 'ADMIN') {
     return <GlobalDashboard />; 
   }
   if (user?.role === 'PROVIDER') {
-    navigate('/provider', { replace: true });
-    return null; 
+    return <Navigate to="/provider" replace />;
   }
   return <Dashboard />; 
 }

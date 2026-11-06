@@ -6,6 +6,11 @@
  * source of truth and the client must not crash on a shape it did not expect.
  */
 
+/**
+ * A row from `GET /quotes`. Every screen except the admin dashboard reads
+ * `totalAmount` and `service.name` (see #26 — `RecentQuote` in
+ * `services/adminDashboardApi.ts` spells them `amount` / `service.title`).
+ */
 export interface ApiQuote {
   id: string;
   status: string;
