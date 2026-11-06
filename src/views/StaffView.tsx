@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Mail, Phone, BriefcaseBusiness, ShieldCheck } from "lucide-react";
+import { API_URL } from '../services/config';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function StaffView() {
   const [staff, setStaff] = useState<any[]>([]);

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { LoaderCircle, X, CheckCircle2 } from "lucide-react";
 import ServiceCard, { type Service } from "../components/ServiceCard";
+import { API_URL } from '../services/config';
 
 // CORRECCIÓN: Usamos la variable de entorno para producción
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function BookingView() {
   const [services, setServices] = useState<Service[]>([]);

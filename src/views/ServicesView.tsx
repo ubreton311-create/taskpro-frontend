@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BriefcaseBusiness, CheckCircle2, Clock3, LoaderCircle, RefreshCw, ClipboardList, AlertCircle, MessageSquare } from "lucide-react";
 import JobOrderCard, { type JobOrder, type JobOrderStatus } from "../components/JobOrderCard";
+import { API_URL } from '../services/config';
 import ChatBox from "../components/chat/ChatBox"; // <-- IMPORT DEL CHAT
 import { getCurrentUser } from "../utils/auth"; // <-- IMPORT DEL USUARIO ACTUAL
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 const getAuthHeaders = (): HeadersInit => {
   const token = localStorage.getItem("token");

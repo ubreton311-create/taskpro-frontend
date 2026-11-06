@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import AdminDashboard from '../components/admin/AdminDashboard';
 import type { AdminStats, KycProvider } from '../types/admin';
+import { API_URL } from '../services/config';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 async function apiRequest<T>(path: string, token: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {

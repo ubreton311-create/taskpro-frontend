@@ -1,8 +1,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { TrendingUp, DollarSign, CheckCircle2 } from "lucide-react";
+import { API_URL } from '../services/config';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function ReportsView() {
   const [quotes, setQuotes] = useState<any[]>([]);

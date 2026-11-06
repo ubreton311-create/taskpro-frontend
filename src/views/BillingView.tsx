@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Banknote, BriefcaseBusiness, CalendarDays, CircleDollarSign, LoaderCircle, RefreshCw, TrendingUp, Wallet, ReceiptText, AlertCircle } from "lucide-react";
+import { API_URL } from '../services/config';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 const PLATFORM_COMMISSION = 0.15;
 
 export default function BillingView() {

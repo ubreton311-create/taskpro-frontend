@@ -3,6 +3,7 @@ import { Users, BriefcaseBusiness, DollarSign, Clock, FileText, ArrowRight, Load
 import { useNavigate } from "react-router-dom";
 import { adminDashboardApi } from "../../services/adminDashboardApi";
 import { getCurrentUser } from "../../utils/auth";
+import { API_URL } from '../../services/config';
 
 export default function GlobalDashboard() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export default function GlobalDashboard() {
         // Cargamos las métricas y las últimas cotizaciones en paralelo
         const [statsRes, quotesRes] = await Promise.all([
           adminDashboardApi.getStats(),
-          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/quotes`, {
+          fetch(`${API_URL}/quotes`, {
             headers: { Authorization: `Bearer ${token}` }
           }).then(res => res.json())
         ]);

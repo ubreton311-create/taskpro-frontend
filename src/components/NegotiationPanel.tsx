@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Send, Lock, ShieldCheck, DollarSign, CheckCircle2 } from "lucide-react";
+import { API_URL } from '../services/config';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 interface NegotiationPanelProps {
   quoteId: string;

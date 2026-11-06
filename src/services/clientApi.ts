@@ -1,6 +1,6 @@
 import type { Quote, Booking, Service } from '../types/client.types';
+import { API_URL } from './config';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 async function apiFetch<T>(endpoint: string): Promise<T> {
   const token = localStorage.getItem('token');

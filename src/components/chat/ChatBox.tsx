@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { X, Send } from 'lucide-react';
+import { API_URL } from '../../services/config';
 
 interface ChatMessage {
   id: string;
@@ -16,7 +17,6 @@ interface ChatBoxProps {
   onClose: () => void;
 }
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export default function ChatBox({ quoteId, currentUserId, otherUserName, onClose }: ChatBoxProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -31,7 +31,7 @@ export default function ChatBox({ quoteId, currentUserId, otherUserName, onClose
     const token = localStorage.getItem('token');
     if (!token) return setError('Sesión expirada.');
 
-    const socket = io(`${SOCKET_URL}/chat`, {
+    const socket = io(`${API_URL}/chat`, {
       auth: { token },
       transports: ['websocket'],
     });
