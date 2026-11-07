@@ -22,7 +22,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="flex h-screen w-64 flex-col bg-[#42116f] text-white">
+    <aside className="relative z-50 flex h-auto w-full shrink-0 flex-col bg-[#42116f] text-white md:h-screen md:w-64 md:sticky md:top-0">
       {/* LOGO */}
       <div className="flex h-20 items-center gap-3 px-6">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-400 font-black text-[#42116f]">

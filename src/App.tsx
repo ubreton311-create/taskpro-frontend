@@ -80,7 +80,6 @@ function CheckoutRoute() {
   return <ClientCheckoutView quoteId={quoteId} onBack={() => navigate('/quotes')} />;
 }
 
-// Dejamos la función por si necesitas facturación después, pero la ruta ahora es /support
 function BillingRoute() {
   const user = getCurrentUser();
   if (user?.role === 'CLIENT') return <ClientBillingView />;
@@ -89,10 +88,13 @@ function BillingRoute() {
 
 function AppLayout() {
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-gray-50">
+    // El contenedor principal: min-h-screen permite scroll en celular.
+    // En pantallas md (tablet/web), h-screen y flex-row para layout de escritorio.
+    <div className="flex min-h-screen w-full flex-col bg-gray-50 md:h-screen md:flex-row md:overflow-hidden">
       <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex w-full flex-1 flex-col overflow-hidden">
         <Topbar />
+        {/* El main con overflow-y-auto para que el contenido scrollee independientemente */}
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <Routes>
             <Route path="/" element={<HomeRoute />} />
@@ -107,7 +109,6 @@ function AppLayout() {
             
             <Route path="/support" element={<CustomerServiceView />} />
             
-            {/* AQUI ESTA LA NUEVA RUTA DEL TECNICO */}
             <Route path="/technician/:id" element={<TechnicianProfileView />} />
             
             <Route path="/admin" element={<AdminDashboardView />} /> 
