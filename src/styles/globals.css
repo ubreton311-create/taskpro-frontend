@@ -3428,3 +3428,36 @@ select {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+/* Mobile navigation: the native modal provides focus containment and restoration. */
+.mobile-drawer { position: fixed; inset: 0 auto 0 0; margin: 0; border: 0; padding: 0; width: min(20rem, 85vw); max-width: none; height: 100dvh; max-height: none; background: #42116f; color: white; overflow: hidden; }
+.mobile-drawer::backdrop { background: rgb(15 8 25 / 0.65); }
+
+:root {
+  --tp-color-primary: #42116f;
+  --tp-color-secondary: #facc15;
+  --tp-color-text: #1a1a1a;
+  --tp-color-surface: #ffffff;
+  --tp-color-background: #f7f5fb;
+  --tp-color-success: #166534;
+  --tp-color-warning: #854d0e;
+  --tp-color-error: #b91c1c;
+  --tp-color-info: #1d4ed8;
+  --tp-space-1: 4px;
+  --tp-space-2: 8px;
+  --tp-space-4: 16px;
+  --tp-space-6: 24px;
+  --tp-radius-control: 12px;
+  --tp-radius-card: 16px;
+  --tp-shadow-card: 0 1px 3px rgb(31 16 44 / 0.1);
+}
+.tp-button-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--tp-space-2);
+  border: 0; border-radius: var(--tp-radius-control); background: var(--tp-color-secondary);
+  color: var(--tp-color-text); padding: 12px 28px; font-weight: 800; cursor: pointer;
+  transition: background-color 150ms ease;
+}
+.tp-button-primary:hover { background: #fde047; }
+.tp-button-primary:active { background: #eab308; }
+.tp-button-primary:disabled { opacity: .5; cursor: not-allowed; }
+:where(a, button, input, select, textarea):focus-visible { outline: 3px solid #7a2fbf !important; outline-offset: 3px; }
+.mobile-drawer :where(a, button):focus-visible { outline-color: #facc15 !important; }

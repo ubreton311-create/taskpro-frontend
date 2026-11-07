@@ -268,17 +268,15 @@ export default function Dashboard() {
   };
 
   const handleSearch = () => {
-    const query = search.trim();
-    if (!query) return;
-    console.info("Buscar servicios en API:", query);
+    document.getElementById("popular-services")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const handleAddService = (service: Service) => {
-    console.info("Solicitar servicio:", service.id);
+  const handleAddService = () => {
+    navigate("/booking");
   };
 
   return (
-    <main className="min-h-screen bg-[#f7f5fb] px-4 py-5 text-[#1a1a1a] sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#f7f5fb] px-4 py-5 text-[#1a1a1a] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1600px] space-y-7">
 
         {/* HERO */}
@@ -305,8 +303,11 @@ export default function Dashboard() {
               {tx("hero.description")}
             </p>
 
+            <button type="button" onClick={() => navigate("/booking")} className="tp-button-primary mt-7">
+              Solicitar servicio <ArrowRight size={18} aria-hidden="true" />
+            </button>
             <form
-              className="mt-8 flex max-w-2xl flex-col gap-2 rounded-2xl border border-white/30 bg-white/95 p-2 shadow-2xl shadow-purple-950/25 backdrop-blur-xl sm:flex-row"
+              className="mt-5 flex max-w-2xl flex-col gap-2 rounded-2xl border border-white/30 bg-white/95 p-2 shadow-2xl shadow-purple-950/25 backdrop-blur-xl sm:flex-row"
               onSubmit={(event) => {
                 event.preventDefault();
                 handleSearch();
@@ -328,7 +329,7 @@ export default function Dashboard() {
 
               <button
                 type="submit"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#facc15] px-7 py-3 font-extrabold text-[#1a1a1a] shadow-lg shadow-yellow-950/15 transition hover:-translate-y-0.5 hover:bg-yellow-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="tp-button-primary"
               >
                 {tx("hero.searchButton")}
                 <ArrowRight size={18} />
@@ -407,7 +408,7 @@ export default function Dashboard() {
         </section>
 
         {/* POPULAR SERVICES */}
-        <section>
+        <section id="popular-services" aria-label="Servicios populares">
           <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
               <h2 className="text-2xl font-black tracking-tight sm:text-3xl">
@@ -420,6 +421,7 @@ export default function Dashboard() {
 
             <button
               type="button"
+              onClick={() => navigate("/booking")}
               className="inline-flex items-center gap-2 self-start text-sm font-bold text-[#7a2fbf] hover:text-[#5b168f] sm:self-auto"
             >
               {tx("services.viewAll")}
@@ -443,6 +445,8 @@ export default function Dashboard() {
                       src={service.image}
                       alt={t(service.translationKey)}
                       loading="lazy"
+                      width="800"
+                      height="400"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=800&q=85";
                       }}
@@ -490,8 +494,8 @@ export default function Dashboard() {
 
                       <button
                         type="button"
-                        aria-label={`${tx("service.book")}: ${t(service.translationKey)}`}
-                        onClick={() => handleAddService(service)}
+                        aria-label={`Ir a solicitar servicio (${t(service.translationKey)})`}
+                        onClick={handleAddService}
                         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#facc15] text-[#1a1a1a] shadow-sm transition hover:rotate-90 hover:bg-yellow-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#7a2fbf]"
                       >
                         <Plus size={23} strokeWidth={2.5} />
@@ -658,6 +662,8 @@ export default function Dashboard() {
                         src={appointment.image}
                         alt=""
                         loading="lazy"
+                        width="64"
+                        height="64"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=800&q=85";
                         }}
@@ -745,6 +751,6 @@ export default function Dashboard() {
           © {new Date().getFullYear()} TaskPro. Todos los derechos reservados.
         </footer>
       </div>
-    </main>
+    </div>
   );
 }

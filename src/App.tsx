@@ -1,53 +1,37 @@
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 
 // Componentes Base
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
 
-// Vistas Admin y Proveedor
-import ClientsView from "./views/ClientsView";
-import BillingView from "./views/BillingView";
-import BookingView from "./views/BookingView";
-import LoginView from "./views/LoginView";
-import RequestQuoteView from "./views/RequestQuoteView";
-import ProviderDashboardView from "./views/ProviderDashboardView";
-import ProviderOnboardingView from "./views/ProviderOnboardingView";
-import AdminDashboardView from "./views/AdminDashboardView";
-import StaffView from "./views/StaffView";
-import ReportsView from "./views/ReportsView";
-import SettingsView from "./views/SettingsView";
-
-// --- DISEÑO PREMIUM ---
-import Dashboard from "./views/Dashboard";
-
-// --- NUEVO CATÁLOGO DE PRODUCTOS ---
-import CleaningCatalog from "./views/CleaningCatalog";
-
-// --- NUEVO SERVICIO AL CLIENTE ---
-import CustomerServiceView from "./views/CustomerServiceView";
-
-// --- NUEVO PERFIL DEL TÉCNICO ---
-import TechnicianProfileView from "./views/TechnicianProfileView";
-
-// NUEVOS COMPONENTES DE GPT (Cliente)
-import ClientQuotesView from "./components/client/ClientQuotesView";
-import ClientCheckoutView from "./components/client/ClientCheckoutView";
-import ClientBillingView from "./components/client/ClientBillingView";
-import GlobalDashboard from "./views/GlobalDashboard";
+const ClientsView = lazy(() => import("./views/ClientsView"));
+const BillingView = lazy(() => import("./views/BillingView"));
+const BookingView = lazy(() => import("./views/BookingView"));
+const LoginView = lazy(() => import("./views/LoginView"));
+const RequestQuoteView = lazy(() => import("./views/RequestQuoteView"));
+const ProviderDashboardView = lazy(() => import("./views/ProviderDashboardView"));
+const ProviderOnboardingView = lazy(() => import("./views/ProviderOnboardingView"));
+const AdminDashboardView = lazy(() => import("./views/AdminDashboardView"));
+const StaffView = lazy(() => import("./views/StaffView"));
+const ReportsView = lazy(() => import("./views/ReportsView"));
+const SettingsView = lazy(() => import("./views/SettingsView"));
+const Dashboard = lazy(() => import("./views/Dashboard"));
+const CleaningCatalog = lazy(() => import("./views/CleaningCatalog"));
+const CustomerServiceView = lazy(() => import("./views/CustomerServiceView"));
+const TechnicianProfileView = lazy(() => import("./views/TechnicianProfileView"));
+const ClientQuotesView = lazy(() => import("./components/client/ClientQuotesView"));
+const ClientCheckoutView = lazy(() => import("./components/client/ClientCheckoutView"));
+const ClientBillingView = lazy(() => import("./components/client/ClientBillingView"));
+const GlobalDashboard = lazy(() => import("./views/GlobalDashboard"));
 
 import { getCurrentUser } from "./utils/auth";
 
-const routeTitles: Record<string, string> = {
-  "/": "Inicio", "/booking": "Solicitar servicio", "/cotizar": "Cotizador Inteligente",
-  "/checkout": "Pago Seguro", "/provider": "Panel de Proveedor", "/admin": "Panel de Administración",
-  "/onboarding": "Registro de Proveedor", "/services": "Tienda de Productos", "/tracking": "Seguimiento",
-  "/support": "Servicio al Cliente", "/clients": "Clientes", "/staff": "Personal", "/reports": "Reportes",
-  "/settings": "Configuración", "/quotes": "Mis Cotizaciones"
-};
+import { getRouteTitle } from "./utils/routeTitles";
 
 function PlaceholderPage() {
   const location = useLocation();
-  const title = routeTitles[location.pathname] ?? "Página no encontrada";
+  const title = getRouteTitle(location.pathname);
   return (
     <section className="page-section">
       <div className="page-heading"><div><span className="eyebrow">TASK PRO SERVICE</span><h1>{title}</h1><p>Administra y consulta tu operación desde un solo lugar.</p></div></div>
@@ -87,15 +71,40 @@ function BillingRoute() {
 }
 
 function AppLayout() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (menuOpen && !dialog.open) dialog.showModal();
+    if (!menuOpen && dialog.open) dialog.close();
+    const previousOverflow = document.body.style.overflow;
+    if (menuOpen) document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 768px)");
+    const onChange = () => { if (media.matches) setMenuOpen(false); };
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
+
   return (
     // El contenedor principal: min-h-screen permite scroll en celular.
     // En pantallas md (tablet/web), h-screen y flex-row para layout de escritorio.
     <div className="flex min-h-screen w-full flex-col bg-gray-50 md:h-screen md:flex-row md:overflow-hidden">
-      <Sidebar />
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-white focus:p-3 focus:text-purple-900">Saltar al contenido</a>
+      <div className="hidden shrink-0 md:block"><Sidebar /></div>
+      <dialog id="mobile-navigation" ref={dialogRef} aria-label="Navegación principal" onClose={() => setMenuOpen(false)} onClick={(event) => { if (event.target === event.currentTarget) setMenuOpen(false); }} className="mobile-drawer">
+        <Sidebar mobile onClose={() => setMenuOpen(false)} />
+      </dialog>
       <div className="flex w-full flex-1 flex-col overflow-hidden">
-        <Topbar />
+        <Topbar menuOpen={menuOpen} onOpenMenu={() => setMenuOpen(true)} />
         {/* El main con overflow-y-auto para que el contenido scrollee independientemente */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        <main id="main-content" key={location.pathname} tabIndex={-1} className="flex-1 overflow-y-auto p-4 md:p-6">
           <Routes>
             <Route path="/" element={<HomeRoute />} />
             <Route path="/quotes" element={<QuotesRoute />} />
@@ -130,11 +139,11 @@ function AppLayout() {
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
+      <Suspense fallback={<div role="status" className="p-6">Cargando…</div>}><Routes>
         <Route path="/login" element={<LoginView />} />
         <Route path="/onboarding" element={<ProviderOnboardingView />} /> 
         <Route path="/*" element={<AppLayout />} />
-      </Routes>
+      </Routes></Suspense>
     </BrowserRouter>
   );
 }
