@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# VITE_API_URL is validated at build time (see the requireApiUrl() plugin in
+# vite.config.ts): a production build cannot exist without it. CI only needs to
+# prove that the build works, so a documentation host is enough here. Real
+# deployments set their own value (Railway / Netlify variables).
+env:
+  VITE_API_URL: https://api.example.com
+
+jobs:
+  build:
+    name: Lint + Build (mismos comandos que Railway)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # `npm run build` already runs `tsc -b`, so a separate typecheck step
+      # would only repeat the same work.
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build

@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
-import type { AdminStats, KycProvider } from '../../types/admin';
+import { useMemo, useState, type ReactNode } from 'react';
+import type { AdminStats, KycDocument, KycProvider } from '../../types/admin';
+import { getErrorMessage } from '../../utils/errors';
 
 interface AdminDashboardProps {
   stats: AdminStats;
@@ -13,14 +14,6 @@ interface AdminDashboardProps {
 
 type DocumentKey = 'ine' | 'selfie' | 'proofOfAddress';
 
-const COLORS = {
-  primary: '#7A2FBF',
-  primaryDark: '#64239F',
-  background: '#F8F9FC',
-  text: '#252136',
-  secondary: '#777386',
-};
-
 function formatCurrency(amount: number, currency = 'MXN') {
   return new Intl.NumberFormat('es-MX', {
     style: 'currency',
@@ -29,7 +22,15 @@ function formatCurrency(amount: number, currency = 'MXN') {
   }).format(amount);
 }
 
-function KpiCard({ title, value, description, icon, iconClass }: any) {
+interface KpiCardProps {
+  title: string;
+  value: ReactNode;
+  description: string;
+  icon: ReactNode;
+  iconClass: string;
+}
+
+function KpiCard({ title, value, description, icon, iconClass }: KpiCardProps) {
   return (
     <article className="min-w-0 rounded-2xl border border-[#eeeaf5] bg-white p-5 shadow-[0_4px_20px_rgba(48,25,78,0.05)] transition-shadow hover:shadow-[0_8px_28px_rgba(48,25,78,0.09)]">
       <div className="flex items-start justify-between gap-3">
@@ -44,7 +45,13 @@ function KpiCard({ title, value, description, icon, iconClass }: any) {
   );
 }
 
-function DocumentCard({ title, document, onPreview }: any) {
+interface DocumentCardProps {
+  title: string;
+  document: KycDocument;
+  onPreview: () => void;
+}
+
+function DocumentCard({ title, document, onPreview }: DocumentCardProps) {
   return (
     <article className="overflow-hidden rounded-xl border border-[#eeeaf5] bg-white">
       <div className="border-b border-[#f0edf5] px-3 py-3">
@@ -60,7 +67,15 @@ function DocumentCard({ title, document, onPreview }: any) {
   );
 }
 
-function ProviderKycModal({ provider, busy, onClose, onApprove, onReject }: any) {
+interface ProviderKycModalProps {
+  provider: KycProvider;
+  busy: boolean;
+  onClose: () => void;
+  onApprove: () => Promise<void>;
+  onReject: (reason: string) => Promise<void>;
+}
+
+function ProviderKycModal({ provider, busy, onClose, onApprove, onReject }: ProviderKycModalProps) {
   const [preview, setPreview] = useState<DocumentKey | null>(null);
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState('');
@@ -69,13 +84,13 @@ function ProviderKycModal({ provider, busy, onClose, onApprove, onReject }: any)
 
   async function handleApprove() {
     setError('');
-    try { await onApprove(); } catch (err: any) { setError(err.message || 'Error al aprobar.'); }
+    try { await onApprove(); } catch (err: unknown) { setError(getErrorMessage(err, 'Error al aprobar.')); }
   }
 
   async function handleReject() {
     if (reason.trim().length < 10) return setError('El motivo debe tener al menos 10 caracteres.');
     setError('');
-    try { await onReject(reason.trim()); } catch (err: any) { setError(err.message || 'Error al rechazar.'); }
+    try { await onReject(reason.trim()); } catch (err: unknown) { setError(getErrorMessage(err, 'Error al rechazar.')); }
   }
 
   return (
@@ -149,7 +164,7 @@ export default function AdminDashboard({ stats, providers, loading = false, acti
   async function refresh() {
     setRefreshing(true);
     setError('');
-    try { await onRefresh(); } catch (err: any) { setError(err.message || 'Error al actualizar.'); } finally { setRefreshing(false); }
+    try { await onRefresh(); } catch (err: unknown) { setError(getErrorMessage(err, 'Error al actualizar.')); } finally { setRefreshing(false); }
   }
 
   async function approve(providerId: string) {

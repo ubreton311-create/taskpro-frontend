@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertCircle, LoaderCircle } from "lucide-react";
 import ProviderDashboard, { type JobOrder } from "../components/ProviderDashboard";
 import ReviewModal from "../components/ReviewModal";
 import { getCurrentUser } from "../utils/auth";
+import { API_URL } from '../services/config';
+import { getErrorMessage, getApiErrorMessage } from '../utils/errors';
+import type { ApiQuote } from '../types/api.types';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem("token");
@@ -12,8 +14,16 @@ function getAuthHeaders(): HeadersInit {
   return { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 }
 
+/** GET /quotes — resolves with the quotes assigned to the signed-in provider. */
+async function fetchProviderQuotes(): Promise<ApiQuote[]> {
+  const response = await fetch(`${API_URL}/quotes`, { headers: getAuthHeaders() });
+  const data = await response.json();
+  if (!response.ok) throw new Error(getApiErrorMessage(data, "Error al cargar solicitudes."), { cause: data });
+  return Array.isArray(data) ? (data as ApiQuote[]) : [];
+}
+
 export default function ProviderDashboardView() {
-  const [quotes, setQuotes] = useState<any[]>([]);
+  const [quotes, setQuotes] = useState<ApiQuote[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [reviewTarget, setReviewTarget] = useState<JobOrder | null>(null);
@@ -21,21 +31,14 @@ export default function ProviderDashboardView() {
   const user = getCurrentUser();
 
   // 1. Cargar las cotizaciones (Solicitudes) de los clientes
-  const loadQuotes = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_URL}/quotes`, { headers: getAuthHeaders() });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data?.message || "Error al cargar solicitudes.");
-      setQuotes(Array.isArray(data) ? data : []);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    let active = true;
+    fetchProviderQuotes()
+      .then((data) => { if (active) setQuotes(data); })
+      .catch((err: unknown) => { if (active) setError(getErrorMessage(err)); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, []);
-
-  useEffect(() => { loadQuotes(); }, [loadQuotes]);
 
   // 2. Mapear los datos de Prisma (Quote) a la interfaz visual (JobOrder)
   const orders: JobOrder[] = useMemo(() => {
@@ -44,10 +47,10 @@ export default function ProviderDashboardView() {
       clientName: q.client?.name || "Cliente",
       serviceName: q.service?.name || "Servicio solicitado",
       address: q.address || "Dirección pendiente",
-      scheduledDate: q.scheduledDate,
+      scheduledDate: q.scheduledDate ?? "",
       amount: Number(q.totalAmount),
-      status: q.status, 
-      pdfUrl: null,
+      status: q.status as JobOrder["status"],
+      pdfUrl: typeof q.pdfUrl === "string" ? q.pdfUrl : undefined,
     }));
   }, [quotes]);
 
@@ -73,13 +76,31 @@ export default function ProviderDashboardView() {
       
       // Actualizamos la vista local
       setQuotes((prev) => prev.map((q) => q.id === order.id ? { ...q, status: "CONFIRMED" } : q));
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(getErrorMessage(err));
     }
   };
 
-  const handleReviewSubmit = async (rating: number, comment: string) => {
-    console.log("Reseña visual (Proveedor):", { quoteId: reviewTarget?.id, rating, comment });
+  const handleReviewSubmit = async ({
+    bookingId,
+    rating,
+    comment,
+  }: {
+    bookingId: string;
+    rating: number;
+    comment: string;
+  }) => {
+    const response = await fetch(`${API_URL}/reviews`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ bookingId, rating, comment }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      throw new Error(data?.message || "No fue posible registrar la reseña.");
+    }
+
     setReviewTarget(null);
   };
 
@@ -92,7 +113,6 @@ export default function ProviderDashboardView() {
         providerName={user?.name || "Proveedor"}
         pendingJobs={pendingJobs}
         commissionsPaid={commissionsPaid}
-        averageRating={4.8}
         orders={orders}
         onAccept={handleAccept} // Nueva función para aceptar trabajos
         onComplete={(order) => setReviewTarget(order)}
@@ -100,7 +120,9 @@ export default function ProviderDashboardView() {
       />
       <ReviewModal
         isOpen={Boolean(reviewTarget)}
-        providerName={reviewTarget?.clientName || "Cliente"}
+        targetName={reviewTarget?.clientName || "Cliente"}
+        targetRole="CLIENT"
+        bookingId={reviewTarget?.id ?? ""}
         onClose={() => setReviewTarget(null)}
         onSubmit={handleReviewSubmit}
       />

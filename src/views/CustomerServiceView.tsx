@@ -1,4 +1,5 @@
 import { useState, type FormEvent, type ElementType } from "react";
+import { API_URL, SUPPORT } from '../services/config';
 import {
   ArrowRight,
   CheckCircle2,
@@ -22,14 +23,6 @@ import {
 // ======================================================
 // CONFIGURACIÓN
 // ======================================================
-const CONTACT = {
-  email: "soporte@taskpro.com",
-  phone: "+52 664 000 0000",
-  whatsappNumber: "526640000000",
-  address: "Atención a clientes TaskPro",
-};
-
-const API_URL = (import.meta.env.VITE_API_URL as string) ?? "http://localhost:3000";
 
 // ======================================================
 // TIPOS
@@ -199,7 +192,14 @@ export default function CustomerServiceView() {
     }
   };
 
-  const whatsappUrl = `https://wa.me/${CONTACT.whatsappNumber}?text=${encodeURIComponent("Hola, necesito ayuda con TaskPro.")}`;
+  // Public support channels come from configuration; unset channels are not
+  // rendered at all, so a real customer never reaches a placeholder number.
+  const whatsappUrl = SUPPORT.whatsapp
+    ? `https://wa.me/${SUPPORT.whatsapp.replace(/[^\d]/g, "")}?text=${encodeURIComponent("Hola, necesito ayuda con TaskPro.")}`
+    : null;
+  const mailtoUrl = SUPPORT.email ? `mailto:${SUPPORT.email}` : null;
+  const telUrl = SUPPORT.phone ? `tel:${SUPPORT.phone.replace(/[^\d+]/g, "")}` : null;
+  const hasContactChannel = Boolean(whatsappUrl || mailtoUrl || telUrl);
 
   return (
     <main className="min-h-screen bg-[#f8f6fc] px-4 py-8 text-[#1a1a1a] sm:px-6 lg:px-10 lg:py-12">
@@ -354,9 +354,21 @@ export default function CustomerServiceView() {
               <h2 className="mb-2 text-xl font-black text-[#42116f]">Información de contacto</h2>
               <p className="mb-5 text-sm leading-6 text-gray-500">Elige el canal que prefieras para comunicarte con nuestro equipo.</p>
               <div className="space-y-3">
-                <ContactCard icon={Mail} title="Correo electrónico" value={CONTACT.email} description="Escríbenos tus consultas" href={`mailto:${CONTACT.email}`} />
-                <ContactCard icon={Phone} title="Teléfono" value={CONTACT.phone} description="Atención telefónica" href={`tel:${CONTACT.phone.replace(/\s/g, "")}`} />
-                <ContactCard icon={MessageCircle} title="WhatsApp" value="Chatea con nosotros" description="Envíanos un mensaje directo" href={whatsappUrl} external />
+                {mailtoUrl && SUPPORT.email && (
+                  <ContactCard icon={Mail} title="Correo electrónico" value={SUPPORT.email} description="Escríbenos tus consultas" href={mailtoUrl} />
+                )}
+                {telUrl && SUPPORT.phone && (
+                  <ContactCard icon={Phone} title="Teléfono" value={SUPPORT.phone} description="Atención telefónica" href={telUrl} />
+                )}
+                {whatsappUrl && (
+                  <ContactCard icon={MessageCircle} title="WhatsApp" value="Chatea con nosotros" description="Envíanos un mensaje directo" href={whatsappUrl} external />
+                )}
+                {!hasContactChannel && (
+                  <p className="text-sm leading-6 text-gray-500">
+                    Los canales de contacto directo no están disponibles todavía.
+                    Envíanos tu solicitud con el formulario y te responderemos por correo.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -380,9 +392,15 @@ export default function CustomerServiceView() {
                 <p className="mt-3 max-w-sm text-sm font-medium leading-7 text-purple-100">
                   Queremos que tengas la mejor experiencia. Nuestro centro de ayuda está diseñado para acompañarte en cada paso.
                 </p>
-                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="mt-7 inline-flex items-center gap-3 rounded-xl bg-[#facc15] px-5 py-3.5 text-sm font-black text-[#1a1a1a] shadow-lg transition hover:-translate-y-0.5 hover:bg-yellow-300">
-                  Contactar soporte <ArrowRight size={18} />
-                </a>
+                {(whatsappUrl || mailtoUrl) && (
+                  <a
+                    href={whatsappUrl ?? mailtoUrl ?? "#"}
+                    {...(whatsappUrl ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    className="mt-7 inline-flex items-center gap-3 rounded-xl bg-[#facc15] px-5 py-3.5 text-sm font-black text-[#1a1a1a] shadow-lg transition hover:-translate-y-0.5 hover:bg-yellow-300"
+                  >
+                    Contactar soporte <ArrowRight size={18} />
+                  </a>
+                )}
                 <div className="mt-7 flex items-center gap-3 border-t border-white/15 pt-5">
                   <div className="flex -space-x-2">
                     <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#60209b] bg-yellow-300 text-[#42116f]"><Users size={16} /></div>
@@ -406,7 +424,7 @@ export default function CustomerServiceView() {
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-gray-500 sm:text-base">Creamos una plataforma pensada para conectar personas con servicios de forma sencilla, confiable y transparente.</p>
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {benefits.map((benefit, index) => {
+            {benefits.map((benefit) => {
               const Icon = benefit.icon;
               return (
                 <article key={benefit.title} className="group relative overflow-hidden rounded-2xl border border-purple-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-purple-200 hover:shadow-xl hover:shadow-purple-950/10">
@@ -437,9 +455,15 @@ export default function CustomerServiceView() {
                 <p className="mt-2 text-sm text-gray-500">Tu satisfacción es parte de nuestro compromiso.</p>
               </div>
             </div>
-            <a href={`mailto:${CONTACT.email}`} className="inline-flex items-center justify-center gap-3 rounded-xl bg-[#facc15] px-7 py-4 text-sm font-black text-[#1a1a1a] shadow-md transition hover:-translate-y-0.5 hover:bg-yellow-300">
-              Hablar con TaskPro <ArrowRight size={18} />
-            </a>
+            {(mailtoUrl || whatsappUrl) && (
+              <a
+                href={mailtoUrl ?? whatsappUrl ?? "#"}
+                {...(mailtoUrl ? {} : { target: "_blank", rel: "noopener noreferrer" })}
+                className="inline-flex items-center justify-center gap-3 rounded-xl bg-[#facc15] px-7 py-4 text-sm font-black text-[#1a1a1a] shadow-md transition hover:-translate-y-0.5 hover:bg-yellow-300"
+              >
+                Hablar con TaskPro <ArrowRight size={18} />
+              </a>
+            )}
           </div>
         </section>
 

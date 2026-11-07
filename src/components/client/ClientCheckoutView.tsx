@@ -239,7 +239,7 @@ export default function ClientCheckoutView({
                 </p>
 
                 <p className="relative mt-1 text-3xl font-bold">
-                  {currency(quote.amount)}
+                  {currency(quote.amount ?? quote.totalAmount ?? 0)}
                 </p>
 
                 <div className="relative mt-7 flex items-center justify-between">
@@ -380,11 +380,11 @@ export default function ClientCheckoutView({
               </p>
 
               <h3 className="mt-2 text-xl font-bold text-gray-900">
-                {quote.title}
+                {quote.title ?? quote.service?.name ?? 'Servicio TaskPro'}
               </h3>
 
               <p className="mt-2 text-sm leading-relaxed text-gray-500">
-                {quote.description || 'Servicio solicitado mediante TaskPro.'}
+                {quote.description ?? quote.service?.description ?? 'Servicio solicitado mediante TaskPro.'}
               </p>
             </div>
 
@@ -428,7 +428,7 @@ export default function ClientCheckoutView({
               </span>
 
               <span className="text-2xl font-bold text-[#7a2fbf]">
-                {currency(quote.amount)}
+                {currency(quote.amount ?? quote.totalAmount ?? 0)}
               </span>
             </div>
 

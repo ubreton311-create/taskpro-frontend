@@ -1,5 +1,5 @@
 {
-  "name": "web",
+  "name": "taskpro-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node scripts/serve.mjs",
+    "typecheck": "tsc -b --force"
   },
   "dependencies": {
     "@react-oauth/google": "^0.13.5",
@@ -41,5 +43,8 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.2",
     "vite": "^8.3.4"
+  },
+  "engines": {
+    "node": ">=22.12 <23"
   }
 }

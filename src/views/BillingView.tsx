@@ -1,32 +1,43 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Banknote, BriefcaseBusiness, CalendarDays, CircleDollarSign, LoaderCircle, RefreshCw, TrendingUp, Wallet, ReceiptText, AlertCircle } from "lucide-react";
+import { API_URL } from '../services/config';
+import { getErrorMessage } from '../utils/errors';
+import type { ApiQuote } from '../types/api.types';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 const PLATFORM_COMMISSION = 0.15;
 
+/** GET /quotes — resolves with the billing history or rejects with a readable error. */
+async function fetchQuotes(): Promise<ApiQuote[]> {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Sesión expirada.");
+  const res = await fetch(`${API_URL}/quotes`, { headers: { Authorization: `Bearer ${token}` } });
+  const data = await res.json();
+  if (!res.ok) throw new Error("No fue posible cargar el historial.");
+  return Array.isArray(data) ? (data as ApiQuote[]) : [];
+}
+
 export default function BillingView() {
-  const [quotes, setQuotes] = useState<any[]>([]);
+  const [quotes, setQuotes] = useState<ApiQuote[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const loadBilling = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("Sesión expirada.");
-      const res = await fetch(`${API_URL}/quotes`, { headers: { Authorization: `Bearer ${token}` } });
-      const data = await res.json();
-      if (!res.ok) throw new Error("No fue posible cargar el historial.");
-      setQuotes(Array.isArray(data) ? data : []);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    let active = true;
+    fetchQuotes()
+      .then((data) => { if (active) setQuotes(data); })
+      .catch((err: unknown) => { if (active) setError(getErrorMessage(err)); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, []);
 
-  useEffect(() => { loadBilling(); }, [loadBilling]);
+  const refresh = () => {
+    setLoading(true);
+    setError("");
+    void fetchQuotes()
+      .then(setQuotes)
+      .catch((err: unknown) => setError(getErrorMessage(err)))
+      .finally(() => setLoading(false));
+  };
 
   const records = useMemo(() => {
     return quotes
@@ -60,7 +71,7 @@ export default function BillingView() {
           <h1 className="text-3xl font-bold tracking-tight text-[#252136]">Mis ganancias</h1>
           <p className="mt-2 text-sm text-[#777386]">Consulta tus ingresos, comisiones e historial de trabajos terminados.</p>
         </div>
-        <button onClick={loadBilling} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-xl border border-[#E8E2F0] bg-white px-4 py-2.5 text-sm font-semibold text-[#393448] shadow-sm hover:bg-purple-50 disabled:opacity-60">
+        <button onClick={refresh} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-xl border border-[#E8E2F0] bg-white px-4 py-2.5 text-sm font-semibold text-[#393448] shadow-sm hover:bg-purple-50 disabled:opacity-60">
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Actualizar
         </button>
       </header>

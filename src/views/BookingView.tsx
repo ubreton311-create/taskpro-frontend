@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { LoaderCircle, X, CheckCircle2 } from "lucide-react";
 import ServiceCard, { type Service } from "../components/ServiceCard";
+import { API_URL } from '../services/config';
+import { getErrorMessage, getApiErrorMessage } from '../utils/errors';
 
 // CORRECCIÓN: Usamos la variable de entorno para producción
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function BookingView() {
   const [services, setServices] = useState<Service[]>([]);
@@ -32,7 +33,7 @@ export default function BookingView() {
     fetch(`${API_URL}/services`)
       .then((res) => res.json())
       .then((data) => setServices(Array.isArray(data) ? data : []))
-      .catch((err) => setErrorMsg("Error al cargar el catálogo."))
+      .catch(() => setErrorMsg("Error al cargar el catálogo."))
       .finally(() => setLoading(false));
   }, []);
 
@@ -97,7 +98,7 @@ export default function BookingView() {
       
       if (!propRes.ok) {
         const propErr = await propRes.json();
-        throw new Error(propErr.message || "Error al registrar la propiedad.");
+        throw new Error(getApiErrorMessage(propErr, "Error al registrar la propiedad."), { cause: propErr });
       }
       const property = await propRes.json();
 
@@ -117,7 +118,7 @@ export default function BookingView() {
 
       if (!bookRes.ok) {
         const errData = await bookRes.json();
-        throw new Error(errData.message || "Error al crear la reserva.");
+        throw new Error(getApiErrorMessage(errData, "Error al crear la reserva."), { cause: errData });
       }
 
       setSuccess(true);
@@ -126,8 +127,8 @@ export default function BookingView() {
         setSelectedService(null);
         setZipCode(""); setStateName(""); setCity(""); setNeighborhoods([]); setSelectedNeighborhood(""); setStreet(""); setExtNumber(""); setIntNumber(""); setDate("");
       }, 3000);
-    } catch (err: any) {
-      setErrorMsg(err.message);
+    } catch (err: unknown) {
+      setErrorMsg(getErrorMessage(err));
     } finally {
       setSubmitting(false);
     }

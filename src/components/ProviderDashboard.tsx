@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getErrorMessage } from '../utils/errors';
 import {
   BriefcaseBusiness,
   Wallet,
@@ -31,10 +32,11 @@ export interface ProviderDashboardProps {
   providerName: string;
   pendingJobs: number;
   commissionsPaid: number;
-  averageRating: number;
+  averageRating?: number;
   orders: JobOrder[];
   onViewPdf: (order: JobOrder) => void;
   onComplete: (order: JobOrder) => Promise<void> | void;
+  onAccept?: (order: JobOrder) => Promise<void> | void;
 }
 
 const money = (amount: number): string =>
@@ -52,6 +54,7 @@ export default function ProviderDashboard({
   orders,
   onViewPdf,
   onComplete,
+  onAccept,
 }: ProviderDashboardProps) {
   const [completingId, setCompletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -63,8 +66,8 @@ export default function ProviderDashboard({
 
     try {
       await onComplete(order);
-    } catch (err: any) {
-      setError(err.message || "No fue posible completar la orden.");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "No fue posible completar la orden."));
     } finally {
       setCompletingId(null);
     }
@@ -130,9 +133,13 @@ export default function ProviderDashboard({
           </div>
           <p className="stat-label">Calificación Promedio</p>
           <div className="stat-value-row">
-            <span className="stat-value">{averageRating.toFixed(1)}</span>
+            <span className="stat-value">
+              {typeof averageRating === 'number' ? averageRating.toFixed(1) : '—'}
+            </span>
           </div>
-          <p className="stat-note">Opiniones de clientes</p>
+          <p className="stat-note">
+            {typeof averageRating === 'number' ? 'Opiniones de clientes' : 'Sin reseñas todavía'}
+          </p>
         </article>
       </div>
 
@@ -244,6 +251,16 @@ export default function ProviderDashboard({
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: "10px" }}>
+                    {onAccept && order.status === "PENDING" && (
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => onAccept(order)}
+                        disabled={completingId === order.id}
+                      >
+                        <CheckCircle2 size={16} />
+                        Aceptar
+                      </button>
+                    )}
                     <button
                       className="btn btn-secondary"
                       onClick={() => onViewPdf(order)}

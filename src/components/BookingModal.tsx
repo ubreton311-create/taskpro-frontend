@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { LoaderCircle, X, CheckCircle2 } from "lucide-react";
+import { getErrorMessage } from '../utils/errors';
 
 interface Service {
   id: string;
@@ -87,8 +88,8 @@ export default function BookingModal({ service, onClose, onSuccess, apiBaseUrl }
         onClose();
       }, 2000);
 
-    } catch (error: any) {
-      setErrorMsg(error.message);
+    } catch (error: unknown) {
+      setErrorMsg(getErrorMessage(error));
     } finally {
       setLoading(false);
     }

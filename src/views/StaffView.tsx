@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Users, Mail, Phone, BriefcaseBusiness, ShieldCheck, Clock } from "lucide-react";
+import { Mail, Phone, BriefcaseBusiness, ShieldCheck } from "lucide-react";
+import { API_URL } from '../services/config';
+import type { ApiUser } from '../types/api.types';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function StaffView() {
-  const [staff, setStaff] = useState<any[]>([]);
+  const [staff, setStaff] = useState<ApiUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,9 +17,9 @@ export default function StaffView() {
         });
         
         if (res.ok) {
-          const data = await res.json();
+          const data = (await res.json()) as ApiUser[];
           // Filtramos solo a los PROVEEDORES
-          const providers = data.filter((u: any) => u.role === 'PROVIDER');
+          const providers = data.filter((u) => u.role === 'PROVIDER');
           setStaff(providers);
         }
       } catch (error) {
@@ -66,9 +67,9 @@ export default function StaffView() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-full bg-purple-100 text-[#7a2fbf] flex items-center justify-center font-bold">
-                          {user.name.charAt(0).toUpperCase()}
+                          {(user.name ?? user.email ?? "?").charAt(0).toUpperCase()}
                         </div>
-                        <p className="font-bold text-[#252136]">{user.name}</p>
+                        <p className="font-bold text-[#252136]">{user.name ?? user.email ?? "Sin nombre"}</p>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
@@ -76,7 +77,7 @@ export default function StaffView() {
                       {user.phone && <p className="flex items-center gap-2 mt-1"><Phone size={14} /> {user.phone}</p>}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
-                      {new Date(user.createdAt).toLocaleDateString()}
+                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "—"}
                     </td>
                     <td className="px-6 py-4">
                       {/* Si no tiene perfil, asumimos que está pendiente */}

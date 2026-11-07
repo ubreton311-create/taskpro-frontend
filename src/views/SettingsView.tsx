@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Settings, UserRound, Mail, Percent, Save, Loader2, ShieldCheck, AlertCircle } from 'lucide-react';
 import { adminApi } from '../services/adminApi';
-import type { AdminProfile, PlatformSettings } from '../services/adminApi';
+import type { AdminProfile } from '../services/adminApi';
 
 export default function SettingsView() {
   const [profile, setProfile] = useState<AdminProfile>({ name: '', email: '' });

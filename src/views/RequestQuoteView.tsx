@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, CalendarDays, Clock3, UserRound, ShieldCheck, CheckCircle2,
-  Loader2, Wallet, Sparkles, AlertCircle, Upload, Home, Paintbrush,
-  Droplets, Zap, Snowflake, PawPrint, Baby, Stethoscope, Package, Sofa,
-  Bath, Wrench, Hammer, Key, Trees, HeartPulse, Truck, Tv, Refrigerator,
-  Settings, Shirt, Wind, Bug, Lock, GlassWater, BadgeCheck
+  Loader2, Wallet, Sparkles, AlertCircle, Upload, Zap, PawPrint, Baby, Package, Sofa,
+  Bath, Wrench, Trees, HeartPulse, BadgeCheck
 } from "lucide-react";
 
 // --------------------------------------------------
@@ -76,7 +74,19 @@ const formatCurrency = (amount: number) =>
 const getInitials = (name: string) =>
   name.trim().split(" ").filter(Boolean).slice(0, 2).map((word) => word[0].toUpperCase()).join("");
 
-async function createQuoteRequest(payload: any) {
+interface QuoteRequestPayload {
+  technicianId?: string;
+  mainCategory: string;
+  subCategory: string;
+  date: string;
+  time: string;
+  description: string;
+  diagnosticFee: number;
+  hasImage: boolean;
+  details: Record<string, unknown>;
+}
+
+async function createQuoteRequest(payload: QuoteRequestPayload) {
   await new Promise((resolve) => setTimeout(resolve, 1500));
   console.log("Solicitud enviada al backend:", payload);
   return { success: true, quoteId: `TP-${Date.now()}` };
@@ -166,13 +176,6 @@ const RequestQuoteView: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const [quoteId, setQuoteId] = useState("");
 
-  useEffect(() => {
-    const selectedCat = TAXONOMY.find(c => c.id === mainCat);
-    if (selectedCat && selectedCat.subcats.length > 0) {
-      setSubCat(selectedCat.subcats[0].id);
-    }
-  }, [mainCat]);
-
   const today = new Date();
   const minDate = [today.getFullYear(), String(today.getMonth() + 1).padStart(2, "0"), String(today.getDate()).padStart(2, "0")].join("-");
 
@@ -227,7 +230,7 @@ const RequestQuoteView: React.FC = () => {
       
       setQuoteId(result.quoteId);
       setSuccess(true);
-    } catch (err) {
+    } catch {
       setError("Ocurrió un error al enviar tu solicitud.");
     } finally {
       setLoading(false);
@@ -335,7 +338,12 @@ const RequestQuoteView: React.FC = () => {
                     <button
                       key={cat.id}
                       type="button"
-                      onClick={() => setMainCat(cat.id)}
+                      onClick={() => {
+                        setMainCat(cat.id);
+                        // Keep the sub-service select in sync with the chosen category.
+                        const [firstSub] = cat.subcats;
+                        if (firstSub) setSubCat(firstSub.id);
+                      }}
                       className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
                         mainCat === cat.id ? "border-[#7a2fbf] bg-purple-50 text-[#42116f] shadow-sm" : "border-gray-100 bg-white text-gray-500 hover:border-purple-200"
                       }`}

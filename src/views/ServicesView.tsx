@@ -1,43 +1,54 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BriefcaseBusiness, CheckCircle2, Clock3, LoaderCircle, RefreshCw, ClipboardList, AlertCircle, MessageSquare } from "lucide-react";
 import JobOrderCard, { type JobOrder, type JobOrderStatus } from "../components/JobOrderCard";
+import { API_URL } from '../services/config';
+import { getErrorMessage, getApiErrorMessage } from '../utils/errors';
+import type { ApiQuote } from '../types/api.types';
 import ChatBox from "../components/chat/ChatBox"; // <-- IMPORT DEL CHAT
 import { getCurrentUser } from "../utils/auth"; // <-- IMPORT DEL USUARIO ACTUAL
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 const getAuthHeaders = (): HeadersInit => {
   const token = localStorage.getItem("token");
   return { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 };
 
+/** GET /quotes — resolves with the provider's assigned quotes. */
+async function fetchProviderQuotes(): Promise<ApiQuote[]> {
+  const res = await fetch(`${API_URL}/quotes`, { headers: getAuthHeaders() });
+  const data = await res.json();
+  if (!res.ok) throw new Error(getApiErrorMessage(data, "Error al cargar solicitudes"), { cause: data });
+  return Array.isArray(data) ? (data as ApiQuote[]) : [];
+}
+
 export default function ServicesView() {
-  const [quotes, setQuotes] = useState<any[]>([]);
+  const [quotes, setQuotes] = useState<ApiQuote[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<JobOrderStatus>("PENDING");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   
   // ESTADOS PARA EL CHAT
-  const [chatTarget, setChatTarget] = useState<any>(null);
+  const [chatTarget, setChatTarget] = useState<{ id: string; clientName?: string } | null>(null);
   const currentUser = getCurrentUser();
 
-  const loadQuotes = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch(`${API_URL}/quotes`, { headers: getAuthHeaders() });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Error al cargar solicitudes");
-      setQuotes(Array.isArray(data) ? data : []);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    let active = true;
+    fetchProviderQuotes()
+      .then((data) => { if (active) setQuotes(data); })
+      .catch((err: unknown) => { if (active) setError(getErrorMessage(err)); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, []);
 
-  useEffect(() => { loadQuotes(); }, [loadQuotes]);
+  const refresh = () => {
+    setLoading(true);
+    setError("");
+    void fetchProviderQuotes()
+      .then(setQuotes)
+      .catch((err: unknown) => setError(getErrorMessage(err)))
+      .finally(() => setLoading(false));
+  };
 
   const orders: JobOrder[] = useMemo(() => {
     return quotes.map((q) => ({
@@ -45,7 +56,7 @@ export default function ServicesView() {
       clientName: q.client?.name || "Cliente",
       serviceName: q.service?.name || "Servicio",
       address: q.address || "Dirección pendiente",
-      scheduledDate: q.scheduledDate,
+      scheduledDate: q.scheduledDate ?? "",
       totalAmount: Number(q.totalAmount),
       status: (q.status as JobOrderStatus) || "PENDING",
     }));
@@ -69,8 +80,8 @@ export default function ServicesView() {
       });
       if (!res.ok) throw new Error("Error al actualizar estado");
       setQuotes((prev) => prev.map((q) => q.id === orderId ? { ...q, status: newStatus } : q));
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(getErrorMessage(err));
     } finally {
       setActionLoading(null);
     }
@@ -92,7 +103,7 @@ export default function ServicesView() {
           <h1 className="text-3xl font-bold tracking-tight text-[#252136]">Mis solicitudes</h1>
           <p className="mt-2 text-sm text-[#777386]">Administra tus trabajos desde la aceptación hasta su finalización.</p>
         </div>
-        <button onClick={loadQuotes} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-xl border border-[#E8E2F0] bg-white px-4 py-2.5 text-sm font-semibold text-[#393448] shadow-sm transition hover:bg-purple-50 disabled:opacity-60">
+        <button onClick={refresh} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-xl border border-[#E8E2F0] bg-white px-4 py-2.5 text-sm font-semibold text-[#393448] shadow-sm transition hover:bg-purple-50 disabled:opacity-60">
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Actualizar
         </button>
       </header>
@@ -162,7 +173,7 @@ export default function ServicesView() {
         <ChatBox 
           quoteId={chatTarget.id} 
           currentUserId={currentUser.id} 
-          otherUserName={chatTarget.clientName} 
+          otherUserName={chatTarget.clientName ?? "Cliente"} 
           onClose={() => setChatTarget(null)} 
         />
       )}
