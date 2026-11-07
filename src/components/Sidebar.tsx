@@ -23,7 +23,7 @@ export default function Sidebar({ mobile = false, onClose }: { mobile?: boolean;
   };
 
   return (
-    <aside aria-label="Menú principal" className="flex h-full w-full shrink-0 flex-col bg-[#42116f] text-white md:h-screen md:w-64">
+    <aside aria-label="Menú principal" className="tp-app-sidebar flex h-full w-full shrink-0 flex-col bg-[#42116f] text-white md:h-screen md:w-64">
       {/* LOGO */}
       <div className="flex h-20 shrink-0 items-center gap-3 px-6">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-400 font-black text-[#42116f]">

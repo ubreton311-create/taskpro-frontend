@@ -222,7 +222,7 @@ export default function ProviderOnboardingView() {
   const steps = ['Datos', 'Experiencia', 'Identidad', 'Seguridad'];
 
   return (
-    <main className="min-h-screen bg-[#f8f9fc] px-4 py-10 text-[#252136] sm:px-6">
+    <main className="tp-onboarding min-h-screen bg-[#f8f9fc] px-4 py-10 text-[#252136] sm:px-6">
       <div className="mx-auto max-w-3xl">
         <header className="mb-8 text-center">
           <div className="mb-3 inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-[#7a2fbf]">
@@ -292,7 +292,7 @@ export default function ProviderOnboardingView() {
                       <label htmlFor="provider-postalCode" className={labelClass}>Código Postal / ZIP</label>
                       <div className="flex gap-2">
                         <input id="provider-postalCode" className={inputClass} maxLength={5} value={form.postalCode} onChange={(e) => update("postalCode", e.target.value.replace(/\D/g, ''))} placeholder="Ej. 22000" />
-                        <button type="button" onClick={searchPostalCode} disabled={isSearchingPostalCode} className="bg-purple-600 text-white px-4 rounded-xl font-bold text-sm disabled:opacity-50">
+                        <button type="button" onClick={searchPostalCode} disabled={isSearchingPostalCode} className="tp-onboarding-search bg-purple-600 text-white px-4 rounded-xl font-bold text-sm disabled:opacity-50">
                           {isSearchingPostalCode ? <LoaderCircle className="animate-spin" /> : "Buscar"}
                         </button>
                       </div>

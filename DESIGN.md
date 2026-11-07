@@ -24,7 +24,7 @@ La familia actual declarada en estilos globales es Inter con fallbacks del siste
 | Embed/Map | Mapa con `title`, carga diferida. | No debe ser la única forma de acceder a información. |
 | Navigation/Topbar, Drawer | Título y navegación; drawer modal nativo en móvil. | Abrir/cerrar, Escape, foco y nombre accesible; mantener navegación de escritorio. |
 | Profile/Summary | Nombre y rol, sin afordancia de menú si no existe. | No presentar un control como clicable sin acción. |
-| Dialog/Booking | Recopilar detalles de reserva. | **Pendiente:** gestión modal de foco y cierre por teclado, dentro de #22. |
+| Dialog/Booking | Recopilar detalles de reserva con `<dialog>` nativo. | Foco, cierre con Escape y retorno al control verificados por Playwright; revisar con lector de pantalla. |
 
 ## Composición y responsive
 
@@ -38,3 +38,22 @@ Espaciar por múltiplos de 4px; usar 16–24px entre componentes y una jerarquí
 - Desktop y móvil comprobados; sin desbordamiento.
 - Componentes y tokens reutilizados; lint, build y pruebas pasan.
 - Métricas definidas con privacidad y consentimiento apropiados; no declarar impacto sin medición.
+
+## Especificaciones operativas para inicio
+
+| Componente | Propiedades | Estados y medidas verificables |
+| --- | --- | --- |
+| Button/Primary | Amarillo `--tp-color-secondary`, texto `--tp-color-text`, radio 12px, padding 12px 28px, peso 800; hero y envío de búsqueda. | `.tp-button-primary` define default, hover `#fde047`, active `#eab308`, disabled 50% y cursor; foco de 3px con separación 3px. |
+| Button/Text | Texto morado oscuro sobre fondo claro, sin fondo; navegación secundaria a catálogo o perfil. | Foco visible; usar `<button>` si ejecuta una acción o `<a>` para navegar. No usar para un control sin acción. |
+| Button/Icon | Icono con etiqueta accesible, objetivo de al menos 44px cuando sea posible; favorito usa `aria-pressed`. | Default, hover y foco; el nombre debe indicar acción y objeto. No usar color como único estado. |
+| Input/Search | Campo de texto etiquetado, borde redondeado de 12–16px; hero y barra desktop. | Entrada normal y foco visible; resultados vacíos tienen texto explícito. El placeholder no sustituye al nombre accesible. |
+| Card/Metric, Service, Person, Appointment | Superficie blanca, radio 16px, borde claro y sombra leve; espaciado interior de 16–24px. | Los elementos de demostración están identificados; no simular interactividad en todo el contenedor. |
+| Heading/Display, Section, Card | Display 30px móvil/48px desktop, sección 24–30px, tarjeta 16px; pesos 700–900. | Preservar orden semántico y contraste; no asignar niveles por apariencia. |
+| Banner/Hero, Promo | Gradiente morado, radio 28px/16px y texto claro; el hero incluye el CTA principal. | No cubrir contenido con decoración; validar contraste sobre todo el degradado. |
+| Badge/Status | Texto explícito con fondo contrastante y radio completo; confirmado/pendiente o disponible/ocupado. | No depender solo del color. |
+| List/Person, Appointment | Grupos verticales con separaciones de 12–20px, nombre, información secundaria y acción real si existe. | El contenido de ejemplo debe ser identificable; acciones siempre nombradas. |
+| Embed/Map | Marco con título accesible, área mínima 300px y carga diferida. | El mapa es de ejemplo; no es condición para acceder al catálogo. |
+| Navigation/Topbar, Drawer, Profile/Summary | Barra de 64px móvil/80px desktop; drawer de hasta 320px o 85vw, sidebar desktop de 256px. | Modal con backdrop, Escape, cierre y contención/restauración de foco. Perfil no simula un menú inexistente. |
+| Dialog/Booking | `<dialog>` con título accesible, ancho hasta 520px, altura máxima 90dvh y campos asociados. | Foco inicial nativo, Escape, cierre explícito; debe validarse con lectores de pantalla. |
+
+Las variantes de tamaño y estado no incluidas en esta tabla aún no son componentes reutilizables estandarizados; no duplicar controles nuevos con estilos divergentes sin revisar su diseño y registrar la excepción. Mantener la auditoría en `docs/homepage-ux-audit.md` para decisiones todavía no confirmadas.

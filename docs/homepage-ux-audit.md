@@ -19,7 +19,18 @@ Objetivo confirmado: iniciar una solicitud de servicio. Alcance confirmado: vari
 | 9 · Medio/medio | UX-10 | Consistencia | Se observan botones amarillos, enlaces de texto, acciones con icono y tarjetas con tratamientos distintos. La captura por sí sola no confirma si las diferencias corresponden a variantes intencionales. | [SUPUESTO] Estilos divergentes para acciones similares pueden dificultar identificar qué es interactivo. | Media | Medio |
 | 10 · Medio/medio | UX-05 | Rendimiento percibido | El código anterior importaba rutas de forma eager. Una captura estática no muestra el orden ni el tiempo de carga. | [SUPUESTO] El código innecesario puede retrasar la primera interacción. | Media | Medio |
 
-**Límites de la evidencia:** no se pueden comprobar desde una imagen estática los estados hover/focus/disabled, el foco por teclado, los nombres accesibles, validación de formularios, carga real ni el comportamiento de los enlaces. Quedan pendientes el recorrido móvil a 375 px, la comprobación explícita de escritorio a 1440 px, la medición de contraste y las capturas posteriores. La captura es útil como referencia visual de escritorio, no reemplaza esas pruebas. La validación con datos reales depende de #32 y del backend.
+**Límites de la captura original:** una imagen estática no comprueba estados interactivos, foco, nombres accesibles, formularios ni carga real. La captura recibida no acredita un viewport exacto. La validación con datos reales depende de #32 y del backend.
+
+## Evidencia posterior en navegador
+
+Se ejecutó Chromium a 375 × 900 y 1440 × 900, con API simulada o sin disponibilidad y tráfico externo bloqueado; por ello faltan imágenes externas y mapa, y los datos son de demostración. Las capturas de 1440 muestran el área visible, pues el contenido se desplaza en un contenedor interior. No son una comparación de rendimiento real:
+
+- Móvil: [antes](ux-screenshots/before-375.png) · [después](ux-screenshots/after-375.png).
+- Escritorio: [antes](ux-screenshots/before-1440.png) · [después](ux-screenshots/after-1440.png).
+- `./scripts/check-ux.sh`: lint, build y 14 pruebas Playwright aprobadas, incluidas reglas automatizadas axe WCAG A/AA en inicio, login, reserva, onboarding y soporte a ambos anchos; también drawer y modal abiertos. Las pruebas son con datos simulados y no prueban todos los estados ni reemplazan una auditoría manual.
+- Contraste teórico de colores sólidos: blanco sobre `#7a2fbf` ≈ 7.03:1 y sobre `#64239f` ≈ 9.20:1. El hero usa degradado y decoraciones: verificar visualmente y medir la composición real; axe puede marcar degradados como imposibles de determinar.
+- El entry del build se redujo de 872.69 kB en el bundle único anterior a aproximadamente 276 kB; no es una medida de LCP, CLS ni mejora real percibida.
+
 
 ## Fase 2 — inventario inicial por captura y código
 
@@ -45,4 +56,7 @@ Los estados interactivos, medidas reales y componentes que solo aparecen despué
 - CTA «Solicitar servicio» y tarjetas conducen a `/booking`; la selección específica no se transfiere, por lo que el usuario la elige allí. Medir clics al CTA y reservas completadas, con consentimiento y analítica aprobada; aún no se instrumentó ni se midió.
 - La búsqueda desplaza a los resultados filtrados. El drawer libera la primera pantalla móvil.
 - Las rutas cargan por demanda. El build local pasó de 872.69 kB en un solo chunk a un entry de ~275 kB; validar transferencia y rendimiento real en navegador.
-- Se mejoraron etiquetas y error visible en reserva; quedan pendientes auditoría de teclado completa, contraste y revisión de otras páginas (#22).
+- Se añadieron etiquetas, estados de catálogo y diálogo nativo para reserva; axe y teclado cubren los casos automatizados descritos, pero no todas las páginas o estados (#22).
+- Se retiraron afordancias sin acción (notificaciones, mapa completo, agenda y mejora de plan), se eliminó el indicador falso de notificaciones y se indicó que la información de ejemplo no está verificada. Se suprimieron estadísticas de proveedor inventadas en las tarjetas de reserva.
+- La búsqueda de escritorio ahora conduce al filtro de inicio. El CTA y las tarjetas conducen al catálogo de reserva sin preseleccionar un servicio.
+- Pendiente: verificar información real con producto/backend (#32), contraste de degradados e imágenes, lector de pantalla, métricas de rendimiento reales e instrumentación de conversión con consentimiento. No se ha medido aumento de conversión.

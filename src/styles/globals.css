@@ -3461,3 +3461,27 @@ select {
 .tp-button-primary:disabled { opacity: .5; cursor: not-allowed; }
 :where(a, button, input, select, textarea):focus-visible { outline: 3px solid #7a2fbf !important; outline-offset: 3px; }
 .mobile-drawer :where(a, button):focus-visible { outline-color: #facc15 !important; }
+
+/* Explicitly scope the home surface: unlayered legacy element rules otherwise
+   override Tailwind's layered color utilities, including white text on the hero. */
+.tp-topbar p { color: #42116f; }
+.tp-topbar p:first-child:not(:last-child) { color: #475569; }
+.tp-home p { color: #475569; }
+.tp-home h1, .tp-home h2, .tp-home h3 { color: #102c53; }
+.tp-home .tp-home-hero h1, .tp-home .tp-home-hero p,
+.tp-home .tp-home-promo h2, .tp-home .tp-home-promo p { color: #fff; }
+.tp-home button { color: #42116f; }
+.tp-home .tp-button-primary, .tp-home button[aria-label^="Ir a solicitar"] { color: #1a1a1a; }
+.tp-home .tp-favorite { color: #fff; background-color: rgb(0 0 0 / 0.65); }
+.tp-home footer { color: #475569; }
+.tp-home .tp-example-note { margin: 0; border-left: 4px solid #7a2fbf; border-radius: 8px; padding: 12px 16px; background: #fff; color: #374151; font-size: 14px; }
+.tp-app-sidebar h1, .tp-app-sidebar p { color: #fff; }
+.tp-app-sidebar button { color: #fff; }
+.booking-dialog { position: fixed; margin: auto; width: min(520px, calc(100vw - 32px)); max-width: none; max-height: 90dvh; padding: 0; border: 0; border-radius: 24px; overflow-y: auto; }
+.booking-dialog::backdrop { background: rgb(16 25 45 / 0.65); }
+.tp-login p, .tp-onboarding p, .tp-support p { color: #475569; }
+.tp-login .tp-login-hero p, .tp-login .tp-login-hero h1,
+.tp-login .tp-login-hero h2 { color: #fff; }
+.tp-login button[type="submit"], .tp-onboarding .tp-onboarding-search,
+.tp-onboarding button[type="submit"] { color: #fff; background-color: #64239f; }
+.tp-login a { color: #64239f; }

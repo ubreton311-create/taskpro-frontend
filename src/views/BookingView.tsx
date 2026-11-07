@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { LoaderCircle, X, CheckCircle2 } from "lucide-react";
 import ServiceCard, { type Service } from "../components/ServiceCard";
 import { API_URL } from '../services/config';
@@ -10,6 +10,13 @@ export default function BookingView() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const bookingDialog = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = bookingDialog.current;
+    if (selectedService && dialog && !dialog.open) dialog.showModal();
+    return () => { if (dialog?.open) dialog.close(); };
+  }, [selectedService]);
   
   // Estados del Formulario
   const [countryCode, setCountryCode] = useState<"MX" | "US">("MX");
@@ -31,7 +38,7 @@ export default function BookingView() {
   useEffect(() => {
     // CORRECCIÓN: Usamos la constante API_URL
     fetch(`${API_URL}/services`)
-      .then((res) => res.json())
+      .then((res) => { if (!res.ok) throw new Error("Error al cargar el catálogo."); return res.json(); })
       .then((data) => setServices(Array.isArray(data) ? data : []))
       .catch(() => setErrorMsg("Error al cargar el catálogo."))
       .finally(() => setLoading(false));
@@ -141,10 +148,10 @@ export default function BookingView() {
       <div style={{ marginBottom: '30px' }}>
         <span style={{ color: '#7a2fbf', fontWeight: 800, fontSize: '12px', letterSpacing: '1.5px' }}>TASK PRO SERVICE</span>
         <h1 style={{ fontSize: '28px', fontWeight: 800, margin: '8px 0', color: '#252136' }}>Solicitar Servicio</h1>
-        <p style={{ color: '#777386', fontSize: '14px' }}>Selecciona uno de nuestros servicios profesionales para tu hogar.</p>
+        <p style={{ color: '#475569', fontSize: '14px' }}>Selecciona uno de nuestros servicios profesionales para tu hogar.</p>
       </div>
 
-      {errorMsg && !selectedService && <p role="alert">{errorMsg}</p>}
+      {errorMsg && !selectedService && <p role="alert" style={{ color: "#b91c1c" }}>{errorMsg}</p>}
       {!errorMsg && services.length === 0 && <p>No hay servicios disponibles por el momento.</p>}
       <div className="services-grid">
         {services.map((s) => (
@@ -153,15 +160,15 @@ export default function BookingView() {
       </div>
 
       {selectedService && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(16, 25, 45, 0.65)', backdropFilter: 'blur(4px)', display: 'grid', placeItems: 'center', zIndex: 9999, padding: '20px' }}>
-          <div style={{ background: '#fff', padding: '32px', borderRadius: '24px', width: '100%', maxWidth: '520px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)', animation: 'dropdown-enter 200ms ease both', maxHeight: '90vh', overflowY: 'auto' }}>
+        <dialog ref={bookingDialog} aria-labelledby="booking-dialog-title" onClose={() => { setSelectedService(null); setErrorMsg(""); setSuccess(false); }} className="booking-dialog">
+          <div style={{ background: '#fff', padding: '32px', borderRadius: '24px', width: '100%', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)' }}>
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <div>
                 <span style={{ fontSize: '11px', fontWeight: 800, color: '#7a2fbf', letterSpacing: '1px' }}>AGENDAR SERVICIO</span>
-                <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '4px 0 0', color: '#252136' }}>{selectedService.name}</h2>
+                <h2 id="booking-dialog-title" style={{ fontSize: '22px', fontWeight: 800, margin: '4px 0 0', color: '#252136' }}>{selectedService.name}</h2>
               </div>
-              <button type="button" aria-label="Cerrar formulario de reserva" onClick={() => { setSelectedService(null); setErrorMsg(""); setSuccess(false); }} style={{ background: '#f1f3f7', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'grid', placeItems: 'center', cursor: 'pointer', color: '#777386' }}>
+              <button type="button" aria-label="Cerrar formulario de reserva" onClick={() => bookingDialog.current?.close()} style={{ background: '#f1f3f7', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'grid', placeItems: 'center', cursor: 'pointer', color: '#777386' }}>
                 <X size={20} />
               </button>
             </div>
@@ -235,7 +242,7 @@ export default function BookingView() {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', paddingTop: '20px', borderTop: '1px solid #eeeaf3' }}>
                   <div>
-                    <span style={{ fontSize: '12px', color: '#777386', fontWeight: 600, display: 'block', marginBottom: '2px' }}>Total a pagar</span>
+                    <span style={{ fontSize: '12px', color: '#475569', fontWeight: 600, display: 'block', marginBottom: '2px' }}>Total a pagar</span>
                     <div style={{ fontSize: '24px', fontWeight: 800, color: '#7a2fbf' }}>${Number(selectedService.price).toFixed(2)}</div>
                   </div>
                   <button onClick={handleBooking} disabled={submitting} style={{ background: '#7a2fbf', color: '#fff', padding: '12px 24px', borderRadius: '10px', fontWeight: 700, fontSize: '14px', border: 'none', cursor: submitting ? 'not-allowed' : 'pointer', boxShadow: '0 4px 12px rgba(122, 47, 191, 0.3)', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -245,7 +252,7 @@ export default function BookingView() {
               </div>
             )}
           </div>
-        </div>
+        </dialog>
       )}
     </section>
   );

@@ -2,7 +2,7 @@
   --primary: #7a2fbf;
   --primary-hover: #64239f;
   --text-primary: #252136;
-  --text-secondary: #777386;
+  --text-secondary: #475569;
   --border: #eeeaf3;
   --surface: #ffffff;
   --star-color: #f5b82e;
@@ -383,6 +383,6 @@
 
 .service-card__bottom-rating span {
   color: var(--text-secondary);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 600;
 }

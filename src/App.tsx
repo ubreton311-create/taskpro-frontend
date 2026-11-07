@@ -41,6 +41,7 @@ function PlaceholderPage() {
 }
 
 function HomeRoute() {
+  const location = useLocation();
   const user = getCurrentUser();
 
   if (user?.role === 'ADMIN') {
@@ -49,7 +50,7 @@ function HomeRoute() {
   if (user?.role === 'PROVIDER') {
     return <Navigate to="/provider" replace />;
   }
-  return <Dashboard />; 
+  return <Dashboard key={location.search} />;
 }
 
 function QuotesRoute() {
@@ -98,7 +99,14 @@ function AppLayout() {
     <div className="flex min-h-screen w-full flex-col bg-gray-50 md:h-screen md:flex-row md:overflow-hidden">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-white focus:p-3 focus:text-purple-900">Saltar al contenido</a>
       <div className="hidden shrink-0 md:block"><Sidebar /></div>
-      <dialog id="mobile-navigation" ref={dialogRef} aria-label="Navegación principal" onClose={() => setMenuOpen(false)} onClick={(event) => { if (event.target === event.currentTarget) setMenuOpen(false); }} className="mobile-drawer">
+      <dialog id="mobile-navigation" ref={dialogRef} aria-label="Navegación principal" onClose={() => setMenuOpen(false)} onClick={(event) => { if (event.target === event.currentTarget) setMenuOpen(false); }} onKeyDown={(event) => {
+        if (event.key !== "Tab") return;
+        const focusable = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])')).filter((element) => element.getClientRects().length > 0);
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      }} className="mobile-drawer">
         <Sidebar mobile onClose={() => setMenuOpen(false)} />
       </dialog>
       <div className="flex w-full flex-1 flex-col overflow-hidden">
