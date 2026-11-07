@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { LoaderCircle, X, CheckCircle2 } from "lucide-react";
 import ServiceCard, { type Service } from "../components/ServiceCard";
 import { API_URL } from '../services/config';
@@ -10,6 +10,13 @@ export default function BookingView() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const bookingDialog = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = bookingDialog.current;
+    if (selectedService && dialog && !dialog.open) dialog.showModal();
+    return () => { if (dialog?.open) dialog.close(); };
+  }, [selectedService]);
   
   // Estados del Formulario
   const [countryCode, setCountryCode] = useState<"MX" | "US">("MX");
@@ -31,7 +38,7 @@ export default function BookingView() {
   useEffect(() => {
     // CORRECCIÓN: Usamos la constante API_URL
     fetch(`${API_URL}/services`)
-      .then((res) => res.json())
+      .then((res) => { if (!res.ok) throw new Error("Error al cargar el catálogo."); return res.json(); })
       .then((data) => setServices(Array.isArray(data) ? data : []))
       .catch(() => setErrorMsg("Error al cargar el catálogo."))
       .finally(() => setLoading(false));
@@ -141,9 +148,11 @@ export default function BookingView() {
       <div style={{ marginBottom: '30px' }}>
         <span style={{ color: '#7a2fbf', fontWeight: 800, fontSize: '12px', letterSpacing: '1.5px' }}>TASK PRO SERVICE</span>
         <h1 style={{ fontSize: '28px', fontWeight: 800, margin: '8px 0', color: '#252136' }}>Solicitar Servicio</h1>
-        <p style={{ color: '#777386', fontSize: '14px' }}>Selecciona uno de nuestros servicios profesionales para tu hogar.</p>
+        <p style={{ color: '#475569', fontSize: '14px' }}>Selecciona uno de nuestros servicios profesionales para tu hogar.</p>
       </div>
 
+      {errorMsg && !selectedService && <p role="alert" style={{ color: "#b91c1c" }}>{errorMsg}</p>}
+      {!errorMsg && services.length === 0 && <p>No hay servicios disponibles por el momento.</p>}
       <div className="services-grid">
         {services.map((s) => (
           <ServiceCard key={s.id} service={s} onBook={setSelectedService} />
@@ -151,15 +160,15 @@ export default function BookingView() {
       </div>
 
       {selectedService && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(16, 25, 45, 0.65)', backdropFilter: 'blur(4px)', display: 'grid', placeItems: 'center', zIndex: 9999, padding: '20px' }}>
-          <div style={{ background: '#fff', padding: '32px', borderRadius: '24px', width: '100%', maxWidth: '520px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)', animation: 'dropdown-enter 200ms ease both', maxHeight: '90vh', overflowY: 'auto' }}>
+        <dialog ref={bookingDialog} aria-labelledby="booking-dialog-title" onClose={() => { setSelectedService(null); setErrorMsg(""); setSuccess(false); }} className="booking-dialog">
+          <div style={{ background: '#fff', padding: '32px', borderRadius: '24px', width: '100%', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)' }}>
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <div>
                 <span style={{ fontSize: '11px', fontWeight: 800, color: '#7a2fbf', letterSpacing: '1px' }}>AGENDAR SERVICIO</span>
-                <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '4px 0 0', color: '#252136' }}>{selectedService.name}</h2>
+                <h2 id="booking-dialog-title" style={{ fontSize: '22px', fontWeight: 800, margin: '4px 0 0', color: '#252136' }}>{selectedService.name}</h2>
               </div>
-              <button onClick={() => { setSelectedService(null); setErrorMsg(""); setSuccess(false); }} style={{ background: '#f1f3f7', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'grid', placeItems: 'center', cursor: 'pointer', color: '#777386' }}>
+              <button type="button" aria-label="Cerrar formulario de reserva" onClick={() => bookingDialog.current?.close()} style={{ background: '#f1f3f7', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'grid', placeItems: 'center', cursor: 'pointer', color: '#777386' }}>
                 <X size={20} />
               </button>
             </div>
@@ -173,20 +182,20 @@ export default function BookingView() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 
-                {errorMsg && <div style={{ background: '#fee2e2', color: '#b91c1c', padding: '12px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, textAlign: 'center' }}>{errorMsg}</div>}
+                {errorMsg && <div role="alert" style={{ background: '#fee2e2', color: '#b91c1c', padding: '12px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, textAlign: 'center' }}>{errorMsg}</div>}
                 
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>País</label>
-                    <select value={countryCode} onChange={(e) => setCountryCode(e.target.value as "US" | "MX")} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', outline: 'none' }}>
+                    <label htmlFor="booking-country" style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>País</label>
+                    <select id="booking-country" value={countryCode} onChange={(e) => setCountryCode(e.target.value as "US" | "MX")} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', outline: 'none' }}>
                       <option value="MX">México</option>
                       <option value="US">Estados Unidos</option>
                     </select>
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>{countryCode === "US" ? "Zip Code" : "Código Postal"}</label>
+                    <label htmlFor="booking-postal" style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>{countryCode === "US" ? "Zip Code" : "Código Postal"}</label>
                     <div style={{ position: 'relative' }}>
-                      <input value={zipCode} onChange={handleZipCodeChange} placeholder={countryCode === "US" ? "92101" : "22000"} maxLength={5} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', outline: 'none' }} />
+                      <input id="booking-postal" value={zipCode} onChange={handleZipCodeChange} placeholder={countryCode === "US" ? "92101" : "22000"} maxLength={5} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', outline: 'none' }} />
                       {cpLoading && <LoaderCircle size={16} className="spin" style={{ position: 'absolute', right: 12, top: 22, color: '#7a2fbf' }} />}
                     </div>
                   </div>
@@ -194,18 +203,18 @@ export default function BookingView() {
 
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>Estado</label>
-                    <input value={stateName} readOnly placeholder="Autocompletado" style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', backgroundColor: '#f8f9fc', color: '#777386' }} />
+                    <label htmlFor="booking-state" style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>Estado</label>
+                    <input id="booking-state" value={stateName} readOnly placeholder="Autocompletado" style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', backgroundColor: '#f8f9fc', color: '#777386' }} />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>Municipio / Ciudad</label>
-                    <input value={city} readOnly placeholder="Autocompletado" style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', backgroundColor: '#f8f9fc', color: '#777386' }} />
+                    <label htmlFor="booking-city" style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>Municipio / Ciudad</label>
+                    <input id="booking-city" value={city} readOnly placeholder="Autocompletado" style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', backgroundColor: '#f8f9fc', color: '#777386' }} />
                   </div>
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>Colonia / Fraccionamiento</label>
-                  <select value={selectedNeighborhood} onChange={(e) => setSelectedNeighborhood(e.target.value)} disabled={neighborhoods.length === 0} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', outline: 'none', backgroundColor: neighborhoods.length === 0 ? '#f8f9fc' : '#fff' }}>
+                  <label htmlFor="booking-neighborhood" style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>Colonia / Fraccionamiento</label>
+                  <select id="booking-neighborhood" value={selectedNeighborhood} onChange={(e) => setSelectedNeighborhood(e.target.value)} disabled={neighborhoods.length === 0} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', outline: 'none', backgroundColor: neighborhoods.length === 0 ? '#f8f9fc' : '#fff' }}>
                     <option value="">Selecciona una colonia...</option>
                     {neighborhoods.map(n => <option key={n} value={n}>{n}</option>)}
                   </select>
@@ -213,27 +222,27 @@ export default function BookingView() {
 
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <div style={{ flex: 2 }}>
-                    <label style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>Calle</label>
-                    <input value={street} onChange={(e) => setStreet(e.target.value)} placeholder="Ej. Av. Revolución" style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', outline: 'none' }} />
+                    <label htmlFor="booking-street" style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>Calle</label>
+                    <input id="booking-street" value={street} onChange={(e) => setStreet(e.target.value)} placeholder="Ej. Av. Revolución" style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', outline: 'none' }} />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>Núm. Ext</label>
-                    <input value={extNumber} onChange={(e) => setExtNumber(e.target.value)} placeholder="123" style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', outline: 'none' }} />
+                    <label htmlFor="booking-exterior" style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>Núm. Ext</label>
+                    <input id="booking-exterior" value={extNumber} onChange={(e) => setExtNumber(e.target.value)} placeholder="123" style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', outline: 'none' }} />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>Núm. Int</label>
-                    <input value={intNumber} onChange={(e) => setIntNumber(e.target.value)} placeholder="(Opcional)" style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', outline: 'none' }} />
+                    <label htmlFor="booking-interior" style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>Núm. Int</label>
+                    <input id="booking-interior" value={intNumber} onChange={(e) => setIntNumber(e.target.value)} placeholder="(Opcional)" style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', outline: 'none' }} />
                   </div>
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>Fecha y Hora</label>
-                  <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', outline: 'none' }} />
+                  <label htmlFor="booking-date" style={{ fontSize: '13px', fontWeight: 700, color: '#252136' }}>Fecha y Hora</label>
+                  <input id="booking-date" type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '6px', outline: 'none' }} />
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', paddingTop: '20px', borderTop: '1px solid #eeeaf3' }}>
                   <div>
-                    <span style={{ fontSize: '12px', color: '#777386', fontWeight: 600, display: 'block', marginBottom: '2px' }}>Total a pagar</span>
+                    <span style={{ fontSize: '12px', color: '#475569', fontWeight: 600, display: 'block', marginBottom: '2px' }}>Total a pagar</span>
                     <div style={{ fontSize: '24px', fontWeight: 800, color: '#7a2fbf' }}>${Number(selectedService.price).toFixed(2)}</div>
                   </div>
                   <button onClick={handleBooking} disabled={submitting} style={{ background: '#7a2fbf', color: '#fff', padding: '12px 24px', borderRadius: '10px', fontWeight: 700, fontSize: '14px', border: 'none', cursor: submitting ? 'not-allowed' : 'pointer', boxShadow: '0 4px 12px rgba(122, 47, 191, 0.3)', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -243,7 +252,7 @@ export default function BookingView() {
               </div>
             )}
           </div>
-        </div>
+        </dialog>
       )}
     </section>
   );

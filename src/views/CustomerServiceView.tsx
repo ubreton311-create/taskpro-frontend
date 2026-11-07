@@ -114,7 +114,7 @@ function ContactCard({ icon: Icon, title, value, description, href, external = f
         <Icon size={21} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-bold uppercase tracking-wider text-gray-400">{title}</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-gray-600">{title}</p>
         <p className="mt-1 truncate text-sm font-extrabold text-[#42116f]">{value}</p>
         <p className="mt-1 text-xs text-gray-500">{description}</p>
       </div>
@@ -202,7 +202,7 @@ export default function CustomerServiceView() {
   const hasContactChannel = Boolean(whatsappUrl || mailtoUrl || telUrl);
 
   return (
-    <main className="min-h-screen bg-[#f8f6fc] px-4 py-8 text-[#1a1a1a] sm:px-6 lg:px-10 lg:py-12">
+    <main className="tp-support min-h-screen bg-[#f8f6fc] px-4 py-8 text-[#1a1a1a] sm:px-6 lg:px-10 lg:py-12">
       <div className="mx-auto max-w-7xl">
         
         {/* HEADER */}
@@ -255,7 +255,7 @@ export default function CustomerServiceView() {
                     value={form.name}
                     onChange={(e) => updateField("name", e.target.value)}
                     placeholder="Tu nombre"
-                    className="w-full rounded-xl border border-gray-200 bg-[#faf9fc] px-4 py-3.5 text-sm outline-none transition placeholder:text-gray-400 focus:border-[#7a2fbf] focus:bg-white focus:ring-4 focus:ring-purple-100"
+                    className="w-full rounded-xl border border-gray-200 bg-[#faf9fc] px-4 py-3.5 text-sm outline-none transition placeholder:text-gray-600 focus:border-[#7a2fbf] focus:bg-white focus:ring-4 focus:ring-purple-100"
                   />
                 </div>
                 <div>
@@ -271,7 +271,7 @@ export default function CustomerServiceView() {
                     value={form.email}
                     onChange={(e) => updateField("email", e.target.value)}
                     placeholder="correo@ejemplo.com"
-                    className="w-full rounded-xl border border-gray-200 bg-[#faf9fc] px-4 py-3.5 text-sm outline-none transition placeholder:text-gray-400 focus:border-[#7a2fbf] focus:bg-white focus:ring-4 focus:ring-purple-100"
+                    className="w-full rounded-xl border border-gray-200 bg-[#faf9fc] px-4 py-3.5 text-sm outline-none transition placeholder:text-gray-600 focus:border-[#7a2fbf] focus:bg-white focus:ring-4 focus:ring-purple-100"
                   />
                 </div>
               </div>
@@ -293,10 +293,10 @@ export default function CustomerServiceView() {
                     value={form.phone}
                     onChange={(e) => updateField("phone", e.target.value)}
                     placeholder="664 000 0000"
-                    className="min-w-0 flex-1 bg-transparent px-4 py-3.5 text-sm outline-none placeholder:text-gray-400"
+                    className="min-w-0 flex-1 bg-transparent px-4 py-3.5 text-sm outline-none placeholder:text-gray-600"
                   />
                 </div>
-                <p className="mt-2 text-xs text-gray-400">Incluye tu lada si tu número no es de México.</p>
+                <p className="mt-2 text-xs text-gray-600">Incluye tu lada si tu número no es de México.</p>
               </div>
 
               <div>
@@ -312,9 +312,9 @@ export default function CustomerServiceView() {
                   value={form.message}
                   onChange={(e) => updateField("message", e.target.value)}
                   placeholder="Escribe aquí tu consulta, comentario o solicitud..."
-                  className="w-full resize-none rounded-xl border border-gray-200 bg-[#faf9fc] px-4 py-3.5 text-sm outline-none transition placeholder:text-gray-400 focus:border-[#7a2fbf] focus:bg-white focus:ring-4 focus:ring-purple-100"
+                  className="w-full resize-none rounded-xl border border-gray-200 bg-[#faf9fc] px-4 py-3.5 text-sm outline-none transition placeholder:text-gray-600 focus:border-[#7a2fbf] focus:bg-white focus:ring-4 focus:ring-purple-100"
                 />
-                <div className="mt-2 text-right text-xs text-gray-400">{form.message.length}/2000 caracteres</div>
+                <div className="mt-2 text-right text-xs text-gray-600">{form.message.length}/2000 caracteres</div>
               </div>
 
               {error && (
@@ -344,7 +344,7 @@ export default function CustomerServiceView() {
                   <>Enviar mensaje <Send size={18} className="transition-transform group-hover:translate-x-1" /></>
                 )}
               </button>
-              <p className="text-center text-xs text-gray-400">Tus datos serán utilizados para atender tu solicitud.</p>
+              <p className="text-center text-xs text-gray-600">Tus datos serán utilizados para atender tu solicitud.</p>
             </form>
           </div>
 
@@ -468,7 +468,7 @@ export default function CustomerServiceView() {
         </section>
 
         <footer className="mt-10 border-t border-purple-100 py-6 text-center">
-          <p className="text-xs text-gray-400">© {new Date().getFullYear()} TaskPro. Todos los derechos reservados.</p>
+          <p className="text-xs text-gray-600">© {new Date().getFullYear()} TaskPro. Todos los derechos reservados.</p>
         </footer>
       </div>
     </main>

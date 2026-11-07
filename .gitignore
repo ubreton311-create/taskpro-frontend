@@ -28,3 +28,7 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+
+# Playwright output
+/test-results/
+/playwright-report/

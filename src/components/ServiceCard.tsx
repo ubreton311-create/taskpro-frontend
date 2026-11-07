@@ -79,14 +79,6 @@ function getCategoryTheme(name: string): CategoryTheme {
   return { icon: House, subtitle: "Servicios Profesionales", className: "default" };
 }
 
-const RATING_BARS = [
-  { stars: 5, percentage: 88, color: "green" },
-  { stars: 4, percentage: 8, color: "yellow" },
-  { stars: 3, percentage: 3, color: "gray" },
-  { stars: 2, percentage: 1, color: "gray" },
-  { stars: 1, percentage: 0, color: "gray" },
-];
-
 const getInitials = (name: string): string => {
   return name
     .trim()
@@ -103,9 +95,9 @@ export default function ServiceCard({ service, onBook }: ServiceCardProps) {
     price,
     providerName = "Proveedor TaskPro",
     providerAvatar,
-    providerRating = 4.8,
-    totalTrips = 1500,
-    yearsOnPlatform = 2.5,
+    providerRating,
+    totalTrips,
+    yearsOnPlatform,
   } = service;
 
   const [avatarError, setAvatarError] = useState(false);
@@ -120,7 +112,7 @@ export default function ServiceCard({ service, onBook }: ServiceCardProps) {
     maximumFractionDigits: 0,
   }).format(Number(price));
 
-  const formattedYears = Number.isInteger(yearsOnPlatform)
+  const formattedYears = yearsOnPlatform === undefined ? null : Number.isInteger(yearsOnPlatform)
     ? yearsOnPlatform.toString()
     : yearsOnPlatform.toFixed(1);
 
@@ -155,27 +147,14 @@ export default function ServiceCard({ service, onBook }: ServiceCardProps) {
           )}
         </div>
 
-        <div className="service-card__reputation">
-          <div className="service-card__rating-number">
-            <strong>{providerRating.toFixed(1)}</strong>
-            <Star size={19} fill="#f5b82e" color="#f5b82e" aria-hidden="true" />
+        {providerRating !== undefined && (
+          <div className="service-card__reputation">
+            <div className="service-card__rating-number">
+              <strong>{providerRating.toFixed(1)}</strong>
+              <Star size={19} fill="#f5b82e" color="#f5b82e" aria-hidden="true" />
+            </div>
           </div>
-
-          <div className="service-card__rating-bars">
-            {RATING_BARS.map((bar) => (
-              <div className="service-card__rating-row" key={bar.stars}>
-                <span>{bar.stars}</span>
-                <Star size={9} fill="currentColor" />
-                <div className="service-card__bar-track">
-                  <div
-                    className={`service-card__bar-fill service-card__bar-fill--${bar.color}`}
-                    style={{ width: `${bar.percentage}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
       </section>
 
       <div className="service-card__provider-name">{providerName}</div>
@@ -183,18 +162,18 @@ export default function ServiceCard({ service, onBook }: ServiceCardProps) {
       {/* ESTADÍSTICAS DEL PROVEEDOR */}
       <section className="service-card__stats">
         <ul>
-          <li>
+          {totalTrips !== undefined && <li>
             <span className="service-card__bullet" />
-            <span><strong>Viajes:</strong> {totalTrips.toLocaleString("en-US")}+</span>
-          </li>
+            <span><strong>Viajes:</strong> {totalTrips.toLocaleString("en-US")}</span>
+          </li>}
           <li>
             <span className="service-card__bullet" />
             <span><strong>Top categorías:</strong> {service.category}</span>
           </li>
-          <li>
+          {formattedYears !== null && <li>
             <span className="service-card__bullet" />
             <span><strong>En TaskPro:</strong> {formattedYears} Años</span>
-          </li>
+          </li>}
         </ul>
       </section>
 
@@ -223,15 +202,6 @@ export default function ServiceCard({ service, onBook }: ServiceCardProps) {
         </button>
       </footer>
 
-      {/* CALIFICACIÓN VISUAL */}
-      <div className="service-card__bottom-rating">
-        <div className="service-card__bottom-stars">
-          {Array.from({ length: 5 }, (_, index) => (
-            <Star key={index} size={15} fill="#f5b82e" color="#f5b82e" strokeWidth={1.5} />
-          ))}
-        </div>
-        <span>Proveedor destacado</span>
-      </div>
     </article>
   );
 }

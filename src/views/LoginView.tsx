@@ -89,11 +89,11 @@ export default function LoginView() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F8F9FC] p-0 font-sans text-[#252136] selection:bg-purple-200">
+    <main className="tp-login min-h-screen bg-[#F8F9FC] p-0 font-sans text-[#252136] selection:bg-purple-200">
       <div className="mx-auto flex min-h-screen w-full max-w-[1600px] flex-col lg:flex-row lg:p-4">
         
         {/* PANEL IZQUIERDO: BRANDING (Diseño Premium de GPT) */}
-        <section className="relative hidden min-h-[720px] w-full flex-col justify-between overflow-hidden rounded-[28px] bg-[#7028B5] p-10 text-white lg:flex lg:w-[52%] xl:p-14">
+        <section className="tp-login-hero relative hidden min-h-[720px] w-full flex-col justify-between overflow-hidden rounded-[28px] bg-[#7028B5] p-10 text-white lg:flex lg:w-[52%] xl:p-14">
           <div className="pointer-events-none absolute -right-28 -top-32 h-[480px] w-[480px] rounded-full bg-fuchsia-400/25 blur-[100px]" />
           <div className="pointer-events-none absolute -bottom-40 -left-24 h-[450px] w-[450px] rounded-full bg-indigo-950/35 blur-[100px]" />
           
@@ -175,7 +175,7 @@ export default function LoginView() {
                 <div className="group relative">
                   <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9691A4] transition-colors group-focus-within:text-[#7A2FBF]" />
                   <input id="password" type={showPassword ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Ingresa tu contraseña" className="w-full rounded-2xl border border-[#E8E5EF] bg-white py-4 pl-12 pr-12 text-sm outline-none transition-all placeholder:text-[#AAA5B6] focus:border-[#7A2FBF] focus:ring-4 focus:ring-purple-100" />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 rounded-lg p-1 text-[#9691A4] hover:text-[#7A2FBF]">
+                  <button type="button" aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"} onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 rounded-lg p-1 text-[#9691A4] hover:text-[#7A2FBF]">
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
@@ -192,7 +192,7 @@ export default function LoginView() {
               <>
               <div className="my-7 flex items-center gap-4">
                 <div className="h-px flex-1 bg-[#E8E5EF]" />
-                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#A09BAC]">O continúa con</span>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#475569]">O continúa con</span>
                 <div className="h-px flex-1 bg-[#E8E5EF]" />
               </div>
 
@@ -217,7 +217,7 @@ export default function LoginView() {
             <p className="mt-8 text-center text-sm text-[#777386]">
               ¿Todavía no tienes cuenta? <a href="/register" className="font-semibold text-[#7A2FBF] hover:underline">Crear cuenta</a>
             </p>
-            <div className="mt-10 flex items-center justify-center gap-2 text-xs text-[#A09BAC]">
+            <div className="mt-10 flex items-center justify-center gap-2 text-xs text-[#475569]">
               <Check className="h-4 w-4 text-[#7A2FBF]" /> <span>Al continuar, aceptas nuestros términos y privacidad.</span>
             </div>
           </div>

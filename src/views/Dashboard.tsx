@@ -16,7 +16,6 @@ import {
   Heart,
   Crown,
   ShieldCheck,
-  ChevronRight,
   Navigation,
 } from "lucide-react";
 
@@ -162,7 +161,7 @@ const textFallbacks: Record<string, string> = {
   "stats.completed": "Servicios completados",
   "stats.rating": "Calificación promedio",
   "services.title": "Servicios populares",
-  "services.subtitle": "Los servicios más solicitados en TaskPro",
+  "services.subtitle": "Explora las categorías; elige tu servicio en el catálogo de solicitud.",
   "services.viewAll": "Ver todos los servicios",
   "services.from": "Desde",
   "technicians.title": "Técnicos cercanos",
@@ -185,7 +184,7 @@ export default function Dashboard() {
   const { t, language } = useTranslation();
   const navigate = useNavigate();
   
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get("q") ?? "");
   const [favorites, setFavorites] = useState<string[]>([]);
 
   // Estados para producción
@@ -194,9 +193,15 @@ export default function Dashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>(defaultAppointments);
 
   const user = getCurrentUser();
-  const customerName = user?.name?.split(" ")[0] || "Carlos";
+  const customerName = user?.name?.split(" ")[0] || "Usuario";
   const currency = language === "es" ? "MXN" : "USD";
   const locale = language === "es" ? "es-MX" : "en-US";
+
+  useEffect(() => {
+    if (window.location.hash === "#popular-services") {
+      document.getElementById("popular-services")?.scrollIntoView({ block: "start" });
+    }
+  }, []);
 
   // --- CONEXIÓN REAL A PRODUCCIÓN ---
   useEffect(() => {
@@ -268,21 +273,19 @@ export default function Dashboard() {
   };
 
   const handleSearch = () => {
-    const query = search.trim();
-    if (!query) return;
-    console.info("Buscar servicios en API:", query);
+    document.getElementById("popular-services")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const handleAddService = (service: Service) => {
-    console.info("Solicitar servicio:", service.id);
+  const handleAddService = () => {
+    navigate("/booking");
   };
 
   return (
-    <main className="min-h-screen bg-[#f7f5fb] px-4 py-5 text-[#1a1a1a] sm:px-6 lg:px-8">
+    <div className="tp-home min-h-screen bg-[#f7f5fb] px-4 py-5 text-[#1a1a1a] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1600px] space-y-7">
 
         {/* HERO */}
-        <section className="relative isolate overflow-hidden rounded-[28px] bg-gradient-to-br from-[#42116f] via-[#7a2fbf] to-[#a855f7] px-6 py-9 text-white shadow-xl shadow-purple-950/15 sm:px-10 sm:py-12 lg:px-14">
+        <section className="tp-home-hero relative isolate overflow-hidden rounded-[28px] bg-gradient-to-br from-[#42116f] via-[#7a2fbf] to-[#64239f] px-6 py-9 text-white shadow-xl shadow-purple-950/15 sm:px-10 sm:py-12 lg:px-14">
           <div className="pointer-events-none absolute -right-24 -top-28 h-80 w-80 rounded-full border-[40px] border-white/10" />
           <div className="pointer-events-none absolute -bottom-32 right-1/4 h-72 w-72 rounded-full bg-fuchsia-300/20 blur-3xl" />
           <div className="pointer-events-none absolute right-8 top-8 hidden h-48 w-48 rotate-12 rounded-[36px] border border-white/20 bg-white/10 shadow-2xl backdrop-blur-xl lg:block" />
@@ -305,8 +308,11 @@ export default function Dashboard() {
               {tx("hero.description")}
             </p>
 
+            <button type="button" onClick={() => navigate("/booking")} className="tp-button-primary mt-7">
+              Solicitar servicio <ArrowRight size={18} aria-hidden="true" />
+            </button>
             <form
-              className="mt-8 flex max-w-2xl flex-col gap-2 rounded-2xl border border-white/30 bg-white/95 p-2 shadow-2xl shadow-purple-950/25 backdrop-blur-xl sm:flex-row"
+              className="mt-5 flex max-w-2xl flex-col gap-2 rounded-2xl border border-white/30 bg-white/95 p-2 shadow-2xl shadow-purple-950/25 backdrop-blur-xl sm:flex-row"
               onSubmit={(event) => {
                 event.preventDefault();
                 handleSearch();
@@ -328,7 +334,7 @@ export default function Dashboard() {
 
               <button
                 type="submit"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#facc15] px-7 py-3 font-extrabold text-[#1a1a1a] shadow-lg shadow-yellow-950/15 transition hover:-translate-y-0.5 hover:bg-yellow-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="tp-button-primary"
               >
                 {tx("hero.searchButton")}
                 <ArrowRight size={18} />
@@ -338,11 +344,11 @@ export default function Dashboard() {
             <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-white/90">
               <span className="inline-flex items-center gap-2">
                 <ShieldCheck size={16} className="text-yellow-300" />
-                Profesionales verificados
+                Explora servicios
               </span>
               <span className="inline-flex items-center gap-2">
                 <Star size={15} className="text-yellow-300" />
-                Calidad y confianza
+                Encuentra opciones para tu hogar
               </span>
             </div>
           </div>
@@ -353,9 +359,9 @@ export default function Dashboard() {
                 <ShieldCheck size={24} />
               </div>
               <div>
-                <p className="text-sm font-bold">TaskPro Verified</p>
+                <p className="text-sm font-bold">TaskPro Service</p>
                 <p className="mt-1 text-xs text-white/80">
-                  Servicios con confianza
+                  Servicios para tu hogar
                 </p>
               </div>
             </div>
@@ -363,7 +369,8 @@ export default function Dashboard() {
         </section>
 
         {/* KPI CARDS */}
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <p className="tp-example-note">Datos ilustrativos: las cifras, precios, técnicos y citas de esta página pueden ser de ejemplo y no representan datos verificados.</p>
+        <section aria-label="Indicadores ilustrativos" className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {[
             {
               label: tx("stats.users"),
@@ -407,7 +414,7 @@ export default function Dashboard() {
         </section>
 
         {/* POPULAR SERVICES */}
-        <section>
+        <section id="popular-services" aria-label="Servicios populares">
           <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
               <h2 className="text-2xl font-black tracking-tight sm:text-3xl">
@@ -420,6 +427,7 @@ export default function Dashboard() {
 
             <button
               type="button"
+              onClick={() => navigate("/booking")}
               className="inline-flex items-center gap-2 self-start text-sm font-bold text-[#7a2fbf] hover:text-[#5b168f] sm:self-auto"
             >
               {tx("services.viewAll")}
@@ -443,9 +451,9 @@ export default function Dashboard() {
                       src={service.image}
                       alt={t(service.translationKey)}
                       loading="lazy"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=800&q=85";
-                      }}
+                      width="800"
+                      height="400"
+                      onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
                       className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
 
@@ -460,7 +468,7 @@ export default function Dashboard() {
                       aria-label={`Favorito: ${t(service.translationKey)}`}
                       aria-pressed={favorites.includes(service.id)}
                       onClick={() => toggleFavorite(service.id)}
-                      className="absolute right-3 top-3 rounded-full bg-black/25 p-2.5 text-white backdrop-blur-md transition hover:bg-white hover:text-[#7a2fbf]"
+                      className="tp-favorite absolute right-3 top-3 rounded-full bg-black/25 p-2.5 text-white backdrop-blur-md transition hover:bg-white hover:text-[#7a2fbf]"
                     >
                       <Heart
                         size={19}
@@ -490,8 +498,8 @@ export default function Dashboard() {
 
                       <button
                         type="button"
-                        aria-label={`${tx("service.book")}: ${t(service.translationKey)}`}
-                        onClick={() => handleAddService(service)}
+                        aria-label={`Ir a solicitar servicio (${t(service.translationKey)})`}
+                        onClick={handleAddService}
                         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#facc15] text-[#1a1a1a] shadow-sm transition hover:rotate-90 hover:bg-yellow-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#7a2fbf]"
                       >
                         <Plus size={23} strokeWidth={2.5} />
@@ -520,13 +528,7 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              <button
-                type="button"
-                className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-[#7a2fbf] hover:underline sm:text-sm"
-              >
-                {tx("technicians.map")}
-                <ChevronRight size={16} />
-              </button>
+
             </div>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -626,13 +628,7 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              <button
-                type="button"
-                className="shrink-0 text-xs font-bold text-[#7a2fbf] hover:underline sm:text-sm"
-              >
-                {tx("appointments.viewAll")}
-                <ArrowRight size={14} className="ml-1 inline" />
-              </button>
+
             </div>
 
             <div className="space-y-5">
@@ -658,9 +654,9 @@ export default function Dashboard() {
                         src={appointment.image}
                         alt=""
                         loading="lazy"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=800&q=85";
-                        }}
+                        width="64"
+                        height="64"
+                        onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
                         className="h-16 w-16 shrink-0 rounded-xl object-cover bg-gray-100"
                       />
 
@@ -702,17 +698,12 @@ export default function Dashboard() {
               })}
             </div>
 
-            <button
-              type="button"
-              className="mt-6 w-full rounded-xl border border-purple-200 px-4 py-3 text-sm font-bold text-[#7a2fbf] transition hover:bg-purple-50"
-            >
-              {tx("appointments.viewAll")}
-            </button>
+
           </aside>
         </section>
 
         {/* PREMIUM PROMO */}
-        <section className="relative isolate overflow-hidden rounded-2xl bg-gradient-to-r from-[#42116f] via-[#7a2fbf] to-[#59208e] p-6 text-white shadow-lg sm:p-8">
+        <section className="tp-home-promo relative isolate overflow-hidden rounded-2xl bg-gradient-to-r from-[#42116f] via-[#7a2fbf] to-[#59208e] p-6 text-white shadow-lg sm:p-8">
           <div className="pointer-events-none absolute -right-8 -top-16 h-56 w-56 rounded-full border-[30px] border-white/10" />
 
           <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
@@ -731,13 +722,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <button
-              type="button"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#facc15] px-6 py-3.5 text-sm font-extrabold text-[#1a1a1a] shadow-lg transition hover:-translate-y-0.5 hover:bg-yellow-300"
-            >
-              {tx("premium.action")}
-              <ArrowRight size={17} />
-            </button>
+
           </div>
         </section>
 
@@ -745,6 +730,6 @@ export default function Dashboard() {
           © {new Date().getFullYear()} TaskPro. Todos los derechos reservados.
         </footer>
       </div>
-    </main>
+    </div>
   );
 }
