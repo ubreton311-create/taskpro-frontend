@@ -31,3 +31,7 @@ En `test-results/` se generan capturas de la página principal y evidencia de er
 3. Comprobar con teclado y lector de pantalla: foco visible, orden de navegación, nombres y estados; abrir/cerrar el drawer y modal con teclado, y verificar que vuelve el foco. Revisar zoom y movimiento reducido.
 4. Ejecutar Lighthouse en móvil y escritorio con red comparable; registrar LCP, CLS y transferencia. El tamaño del bundle no demuestra por sí solo una mejora percibida.
 5. Revisar con producto la procedencia de estadísticas, precios, perfiles y citas antes de presentarlos como datos reales; definir instrumentación y consentimiento antes de medir clics o reservas.
+
+## WSL: ejecución lenta
+
+Si el primer acceso agota el tiempo de espera y el proyecto está en `/mnt/c`, especialmente en una carpeta sincronizada con OneDrive, el acceso al sistema de archivos puede hacer más lenta la transformación inicial de Vite. La primera prueba espera hasta 120 segundos y sigue comprobando explícitamente el contenido y la accesibilidad. Si persiste, considera trabajar en una copia dentro del sistema de archivos Linux de WSL (por ejemplo `~/proyectos/taskpro-frontend`), instalar allí las dependencias con `npm ci` y volver a ejecutar. Antes de cambiar de copia, guarda tus cambios y transfiere tu configuración local de manera segura; no subas `.env.local` a Git.

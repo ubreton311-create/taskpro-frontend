@@ -16,10 +16,12 @@ async function mockNetwork(page: Page) {
 
 for (const width of [375, 1440]) {
   test(`client homepage at ${width}px: CTA, search and accessibility`, async ({ page }, testInfo) => {
+    // The first Vite transform can be slow on WSL's Windows-mounted filesystem.
+    test.setTimeout(120_000);
     await page.setViewportSize({ width, height: 900 });
     await mockNetwork(page);
-    await page.goto('/');
-    await expect(page.getByRole('heading', { name: /Qué servicio necesitas hoy/ })).toBeVisible();
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { name: /Qué servicio necesitas hoy/ })).toBeVisible({ timeout: 60_000 });
     await expect(page.getByText('Datos ilustrativos:', { exact: false })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await page.screenshot({ path: testInfo.outputPath(`homepage-${width}.png`), fullPage: true });
