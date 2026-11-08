@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { I18nContext, type Language } from "./i18nContext";
 
 export type { Language } from "./i18nContext";
@@ -29,8 +29,6 @@ function getInitialLanguage(): Language {
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(getInitialLanguage);
-
-  useEffect(() => { document.documentElement.lang = language; }, [language]);
 
   const setLanguage = useCallback((nextLang: Language) => {
     setLanguageState(nextLang);

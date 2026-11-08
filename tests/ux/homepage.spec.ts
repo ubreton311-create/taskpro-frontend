@@ -166,3 +166,36 @@ for (const role of ['CLIENT', 'ADMIN', 'PROVIDER'] as const) {
     else await expect(search).toHaveCount(0);
   });
 }
+
+test.describe('language metadata with partial translation', () => {
+  test.use({ locale: 'en-US' });
+
+  test('Spanish pages keep their language and translated fragments declare English', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await mockNetwork(page);
+    await page.goto('/');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'es');
+    const translatedTitle = page.getByRole('heading', { name: 'Plumbing' });
+    await expect(translatedTitle).toHaveAttribute('lang', 'en');
+    await expect(page.getByRole('button', { name: 'Favorite: Plumbing' })).toHaveAttribute('lang', 'en');
+    await expect(page.getByRole('button', { name: 'Request a service (Plumbing)' })).toHaveAttribute('lang', 'en');
+    await expect(page.locator('p[lang="en"]').first()).toBeVisible();
+    await expect(page.getByText('Confirmado', { exact: true }).first()).not.toHaveAttribute('lang', 'en');
+    const switcher = page.getByRole('button', { name: 'Language: EN, switch to Spanish' });
+    await expect(switcher).toHaveAttribute('lang', 'en');
+    await switcher.click();
+    await expect(page.locator('html')).toHaveAttribute('lang', 'es');
+    await expect(page.getByRole('heading', { name: 'Plomería' })).toHaveAttribute('lang', 'es');
+    await page.getByRole('button', { name: 'Idioma: ES, cambiar a inglés' }).click();
+    await expect(translatedTitle).toHaveAttribute('lang', 'en');
+    await page.goto('/support');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'es');
+    await expect(page.getByRole('heading', { name: 'Envíanos un mensaje' })).toBeVisible();
+    await page.goto('/login');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'es');
+    await expect(page.getByLabel('Contraseña', { exact: true })).toBeVisible();
+    await page.goto('/booking');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'es');
+    await expect(page.getByRole('button', { name: 'Reservar Plomería' })).toBeVisible();
+  });
+});

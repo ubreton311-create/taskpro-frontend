@@ -27,7 +27,7 @@ Se ejecutó Chromium a 375 × 900 y 1440 × 900, con API simulada o sin disponib
 
 - Móvil: [antes](ux-screenshots/before-375.png) · [después](ux-screenshots/after-375.png).
 - Escritorio: [antes](ux-screenshots/before-1440.png) · [después](ux-screenshots/after-1440.png).
-- `./scripts/check-ux.sh`: lint, build y 18 pruebas Playwright aprobadas, incluidas reglas automatizadas axe WCAG A/AA en inicio, login, reserva, onboarding y soporte a ambos anchos; también drawer y modal abiertos. Las pruebas son con datos simulados y no prueban todos los estados ni reemplazan una auditoría manual.
+- `./scripts/check-ux.sh`: lint, build y 19 pruebas Playwright aprobadas, incluidas reglas automatizadas axe WCAG A/AA en inicio, login, reserva, onboarding y soporte a ambos anchos; también drawer y modal abiertos. Las pruebas son con datos simulados y no prueban todos los estados ni reemplazan una auditoría manual.
 - Contraste teórico de colores sólidos: blanco sobre `#7a2fbf` ≈ 7.03:1 y sobre `#64239f` ≈ 9.20:1. El hero usa degradado y decoraciones: verificar visualmente y medir la composición real; axe puede marcar degradados como imposibles de determinar.
 - El entry del build se redujo de 872.69 kB en el bundle único anterior a aproximadamente 276 kB; no es una medida de LCP, CLS ni mejora real percibida.
 
@@ -60,3 +60,5 @@ Los estados interactivos, medidas reales y componentes que solo aparecen despué
 - Se retiraron afordancias sin acción (notificaciones, mapa completo, agenda y mejora de plan), se eliminó el indicador falso de notificaciones y se indicó que la información de ejemplo no está verificada. Se suprimieron estadísticas de proveedor inventadas en las tarjetas de reserva.
 - La búsqueda de escritorio ahora conduce al filtro de inicio. El CTA y las tarjetas conducen al catálogo de reserva sin preseleccionar un servicio.
 - Pendiente: verificar información real con producto/backend (#32), contraste de degradados e imágenes, lector de pantalla, métricas de rendimiento reales e instrumentación de conversión con consentimiento. No se ha medido aumento de conversión.
+
+- Idioma: el documento sigue declarado en español mientras la interfaz esté traducida parcialmente; los fragmentos y nombres accesibles realmente traducidos al inglés declaran `lang="en"`. La traducción completa y la validación con lectores de pantalla siguen pendientes.

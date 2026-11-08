@@ -455,6 +455,7 @@ export default function Dashboard() {
                   <div className="relative h-48 overflow-hidden bg-gray-100">
                     <img
                       src={service.image}
+                      lang={language}
                       alt={t(service.translationKey)}
                       loading="lazy"
                       width="800"
@@ -471,7 +472,8 @@ export default function Dashboard() {
 
                     <button
                       type="button"
-                      aria-label={`Favorito: ${t(service.translationKey)}`}
+                      lang={language}
+                      aria-label={language === "en" ? `Favorite: ${t(service.translationKey)}` : `Favorito: ${t(service.translationKey)}`}
                       aria-pressed={favorites.includes(service.id)}
                       onClick={() => toggleFavorite(service.id)}
                       className="tp-favorite absolute right-3 top-3 rounded-full bg-black/25 p-2.5 text-white backdrop-blur-md transition hover:bg-white hover:text-[#7a2fbf]"
@@ -488,7 +490,7 @@ export default function Dashboard() {
                   </div>
 
                   <div className="p-4">
-                    <h3 className="text-base font-extrabold">
+                    <h3 lang={language} className="text-base font-extrabold">
                       {t(service.translationKey)}
                     </h3>
 
@@ -504,7 +506,8 @@ export default function Dashboard() {
 
                       <button
                         type="button"
-                        aria-label={`Ir a solicitar servicio (${t(service.translationKey)})`}
+                        lang={language}
+                        aria-label={language === "en" ? `Request a service (${t(service.translationKey)})` : `Ir a solicitar servicio (${t(service.translationKey)})`}
                         onClick={handleAddService}
                         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#facc15] text-[#1a1a1a] shadow-sm transition hover:rotate-90 hover:bg-yellow-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#7a2fbf]"
                       >
@@ -668,7 +671,7 @@ export default function Dashboard() {
 
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <p className="text-xs font-bold text-gray-500">
+                          <p lang={language} className="text-xs font-bold text-gray-500">
                             {formatDate(appointment.date)}
                           </p>
 
