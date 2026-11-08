@@ -144,3 +144,27 @@ moved from `main.tsx` to `src/App.tsx`, the i18n hook moved to
 `src/i18n/useTranslation.ts`, and data loading became cancellable
 `fetch → .then(...)` chains instead of `useEffect(() => { load(); }, [load])`,
 which also removed a race where a late response could overwrite newer state.
+
+---
+
+## D-009 — Track full internationalization separately from the mobile UX work
+
+**Date:** 2026-11-07 · **Status:** accepted
+
+The current mobile navigation and homepage work does not include translating the
+entire application. Full language handling and i18n are tracked in #35; general
+accessibility remains in #22. Coordinate shared language-metadata and
+screen-reader checks rather than duplicating implementation.
+
+**Interim mitigation:** while the rendered interface is predominantly Spanish,
+the document declares Spanish. Known fragments and accessible names actually
+translated to English declare their language explicitly. The existing selector
+and saved preference remain; this is not a claim that English coverage is
+complete, nor a substitute for verification with a screen reader.
+
+**Consequence:** #35 owns the full coverage inventory, agreed supported-language
+and fallback policy, translations, locale and currency rules, metadata, and
+cross-route testing. Product and backend dependencies must be confirmed, and
+language alone must not be treated as proof of currency or price. The interim
+metadata fix stays in the current PR; do not weaken accessibility to defer the
+broader work.

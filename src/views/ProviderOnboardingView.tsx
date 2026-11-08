@@ -222,7 +222,7 @@ export default function ProviderOnboardingView() {
   const steps = ['Datos', 'Experiencia', 'Identidad', 'Seguridad'];
 
   return (
-    <main className="min-h-screen bg-[#f8f9fc] px-4 py-10 text-[#252136] sm:px-6">
+    <main className="tp-onboarding min-h-screen bg-[#f8f9fc] px-4 py-10 text-[#252136] sm:px-6">
       <div className="mx-auto max-w-3xl">
         <header className="mb-8 text-center">
           <div className="mb-3 inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-[#7a2fbf]">
@@ -248,7 +248,7 @@ export default function ProviderOnboardingView() {
             })}
           </nav>
 
-          {errorMessage && <div className="mb-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{errorMessage}</div>}
+          {errorMessage && <div role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{errorMessage}</div>}
           {successMessage && <div className="mb-5 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700">{successMessage}</div>}
 
           <form onSubmit={submitForm} noValidate>
@@ -257,12 +257,12 @@ export default function ProviderOnboardingView() {
                 <h2 className="text-xl font-bold">Datos personales y dirección</h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className={labelClass}>Nombre completo *</label>
-                    <input className={inputClass} value={form.fullName} onChange={(e) => update("fullName", e.target.value)} placeholder="Ej. Martha Sánchez" />
+                    <label htmlFor="provider-fullName" className={labelClass}>Nombre completo *</label>
+                    <input id="provider-fullName" className={inputClass} value={form.fullName} onChange={(e) => update("fullName", e.target.value)} placeholder="Ej. Martha Sánchez" />
                   </div>
                   <div>
-                    <label className={labelClass}>Teléfono *</label>
-                    <input className={inputClass} type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} placeholder="+52 664 123 4567" />
+                    <label htmlFor="provider-phone" className={labelClass}>Teléfono *</label>
+                    <input id="provider-phone" className={inputClass} type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} placeholder="+52 664 123 4567" />
                   </div>
                 </div>
 
@@ -274,7 +274,7 @@ export default function ProviderOnboardingView() {
                 {form.canInvoice && (
                   <div className={fileCardClass}>
                     <p className="text-sm font-bold mb-2">Constancia Fiscal (PDF)</p>
-                    <input type="file" accept=".pdf" onChange={(e) => setTaxCertificate(e.target.files?.[0] || null)} className={fileInputClass} />
+                    <input aria-label="Constancia Fiscal (PDF)" type="file" accept=".pdf" onChange={(e) => setTaxCertificate(e.target.files?.[0] || null)} className={fileInputClass} />
                   </div>
                 )}
 
@@ -282,28 +282,28 @@ export default function ProviderOnboardingView() {
                   <h3 className="font-bold mb-4">Dirección de ubicación</h3>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className={labelClass}>País</label>
-                      <select className={inputClass} value={form.country} onChange={(e) => changeCountry(e.target.value as CountryCode)}>
+                      <label htmlFor="provider-country" className={labelClass}>País</label>
+                      <select id="provider-country" className={inputClass} value={form.country} onChange={(e) => changeCountry(e.target.value as CountryCode)}>
                         <option value="MX">México</option>
                         <option value="US">Estados Unidos</option>
                       </select>
                     </div>
                     <div>
-                      <label className={labelClass}>Código Postal / ZIP</label>
+                      <label htmlFor="provider-postalCode" className={labelClass}>Código Postal / ZIP</label>
                       <div className="flex gap-2">
-                        <input className={inputClass} maxLength={5} value={form.postalCode} onChange={(e) => update("postalCode", e.target.value.replace(/\D/g, ''))} placeholder="Ej. 22000" />
-                        <button type="button" onClick={searchPostalCode} disabled={isSearchingPostalCode} className="bg-purple-600 text-white px-4 rounded-xl font-bold text-sm disabled:opacity-50">
+                        <input id="provider-postalCode" className={inputClass} maxLength={5} value={form.postalCode} onChange={(e) => update("postalCode", e.target.value.replace(/\D/g, ''))} placeholder="Ej. 22000" />
+                        <button type="button" onClick={searchPostalCode} disabled={isSearchingPostalCode} className="tp-onboarding-search bg-purple-600 text-white px-4 rounded-xl font-bold text-sm disabled:opacity-50">
                           {isSearchingPostalCode ? <LoaderCircle className="animate-spin" /> : "Buscar"}
                         </button>
                       </div>
                       {postalMessage && <p className="text-xs text-purple-600 mt-1">{postalMessage}</p>}
                     </div>
-                    <div><label className={labelClass}>Estado</label><input className={inputClass} value={form.state} onChange={(e) => update("state", e.target.value)} /></div>
-                    <div><label className={labelClass}>Ciudad</label><input className={inputClass} value={form.city} onChange={(e) => update("city", e.target.value)} /></div>
-                    <div><label className={labelClass}>Colonia</label><input className={inputClass} value={form.neighborhood} onChange={(e) => update("neighborhood", e.target.value)} /></div>
-                    <div><label className={labelClass}>Calle</label><input className={inputClass} value={form.street} onChange={(e) => update("street", e.target.value)} /></div>
-                    <div><label className={labelClass}>Número Exterior *</label><input className={inputClass} value={form.extNumber} onChange={(e) => update("extNumber", e.target.value)} /></div>
-                    <div><label className={labelClass}>Número Interior</label><input className={inputClass} value={form.intNumber} onChange={(e) => update("intNumber", e.target.value)} /></div>
+                    <div><label htmlFor="provider-state" className={labelClass}>Estado</label><input id="provider-state" className={inputClass} value={form.state} onChange={(e) => update("state", e.target.value)} /></div>
+                    <div><label htmlFor="provider-city" className={labelClass}>Ciudad</label><input id="provider-city" className={inputClass} value={form.city} onChange={(e) => update("city", e.target.value)} /></div>
+                    <div><label htmlFor="provider-neighborhood" className={labelClass}>Colonia</label><input id="provider-neighborhood" className={inputClass} value={form.neighborhood} onChange={(e) => update("neighborhood", e.target.value)} /></div>
+                    <div><label htmlFor="provider-street" className={labelClass}>Calle</label><input id="provider-street" className={inputClass} value={form.street} onChange={(e) => update("street", e.target.value)} /></div>
+                    <div><label htmlFor="provider-extNumber" className={labelClass}>Número Exterior *</label><input id="provider-extNumber" className={inputClass} value={form.extNumber} onChange={(e) => update("extNumber", e.target.value)} /></div>
+                    <div><label htmlFor="provider-intNumber" className={labelClass}>Número Interior</label><input id="provider-intNumber" className={inputClass} value={form.intNumber} onChange={(e) => update("intNumber", e.target.value)} /></div>
                   </div>
                 </div>
               </section>
@@ -313,16 +313,16 @@ export default function ProviderOnboardingView() {
               <section className="space-y-5">
                 <h2 className="text-xl font-bold">Experiencia profesional</h2>
                 <div>
-                  <label className={labelClass}>Años de experiencia *</label>
-                  <input className={inputClass} type="number" min="0" value={form.experienceYears} onChange={(e) => update("experienceYears", e.target.value)} />
+                  <label htmlFor="provider-experienceYears" className={labelClass}>Años de experiencia *</label>
+                  <input id="provider-experienceYears" className={inputClass} type="number" min="0" value={form.experienceYears} onChange={(e) => update("experienceYears", e.target.value)} />
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div><label className={labelClass}>Facebook (Opcional)</label><input className={inputClass} value={form.facebook} onChange={(e) => update("facebook", e.target.value)} placeholder="https://facebook.com/tu-perfil" /></div>
-                  <div><label className={labelClass}>Instagram (Opcional)</label><input className={inputClass} value={form.instagram} onChange={(e) => update("instagram", e.target.value)} placeholder="https://instagram.com/tu-perfil" /></div>
+                  <div><label htmlFor="provider-facebook" className={labelClass}>Facebook (Opcional)</label><input id="provider-facebook" className={inputClass} value={form.facebook} onChange={(e) => update("facebook", e.target.value)} placeholder="https://facebook.com/tu-perfil" /></div>
+                  <div><label htmlFor="provider-instagram" className={labelClass}>Instagram (Opcional)</label><input id="provider-instagram" className={inputClass} value={form.instagram} onChange={(e) => update("instagram", e.target.value)} placeholder="https://instagram.com/tu-perfil" /></div>
                 </div>
                 <div className={fileCardClass}>
                   <p className="text-sm font-bold mb-2">Cartas de recomendación (PDF)</p>
-                  <input type="file" multiple accept=".pdf" onChange={(e) => setRecommendationLetters(Array.from(e.target.files || []))} className={fileInputClass} />
+                  <input aria-label="Cartas de recomendación (PDF)" type="file" multiple accept=".pdf" onChange={(e) => setRecommendationLetters(Array.from(e.target.files || []))} className={fileInputClass} />
                 </div>
               </section>
             )}
@@ -332,7 +332,7 @@ export default function ProviderOnboardingView() {
                 <h2 className="text-xl font-bold">Verificación de identidad</h2>
                 <div className={fileCardClass}>
                   <p className="text-sm font-bold mb-2">INE o Pasaporte (Imagen) *</p>
-                  <input type="file" accept="image/*" onChange={(e) => setIdPhoto(e.target.files?.[0] || null)} className={fileInputClass} />
+                  <input aria-label="INE o Pasaporte (Imagen) *" type="file" accept="image/*" onChange={(e) => setIdPhoto(e.target.files?.[0] || null)} className={fileInputClass} />
                 </div>
                 <div className="rounded-2xl border border-purple-100 bg-purple-50/60 p-4">
                   <p className="font-semibold mb-2">Ubicación GPS (Opcional)</p>
@@ -348,13 +348,13 @@ export default function ProviderOnboardingView() {
               <section className="space-y-5">
                 <h2 className="text-xl font-bold">Seguridad y ubicación</h2>
                 <div>
-                  <label className={labelClass}>Código de Seguridad (4 dígitos) *</label>
-                  <input className={inputClass} maxLength={4} value={form.verificationCode} onChange={(e) => update("verificationCode", e.target.value.replace(/\D/g, ''))} placeholder="0000" />
+                  <label htmlFor="provider-verificationCode" className={labelClass}>Código de Seguridad (4 dígitos) *</label>
+                  <input id="provider-verificationCode" className={inputClass} maxLength={4} value={form.verificationCode} onChange={(e) => update("verificationCode", e.target.value.replace(/\D/g, ''))} placeholder="0000" />
                   <p className="text-xs text-gray-500 mt-1">Escribe este código en un papel y tómate una foto con él en tu domicilio.</p>
                 </div>
                 <div className={fileCardClass}>
                   <p className="text-sm font-bold mb-2">Comprobante de domicilio (Imagen) *</p>
-                  <input type="file" accept="image/*" onChange={(e) => setProofOfAddressPhoto(e.target.files?.[0] || null)} className={fileInputClass} />
+                  <input aria-label="Comprobante de domicilio (Imagen) *" type="file" accept="image/*" onChange={(e) => setProofOfAddressPhoto(e.target.files?.[0] || null)} className={fileInputClass} />
                 </div>
               </section>
             )}
