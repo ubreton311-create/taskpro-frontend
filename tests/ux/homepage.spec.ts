@@ -128,3 +128,41 @@ for (const width of [375, 1440]) {
     });
   }
 }
+
+test('topbar searches keep client favorites and synchronize repeated searches', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mockNetwork(page);
+  await page.goto('/');
+  const favorite = page.getByRole('button', { name: 'Favorito: Plomería' });
+  await favorite.click();
+  await expect(favorite).toHaveAttribute('aria-pressed', 'true');
+  const topbarSearch = page.getByRole('searchbox', { name: 'Buscar servicios' });
+  await topbarSearch.fill('electricidad');
+  await topbarSearch.press('Enter');
+  await expect(page.getByRole('heading', { name: 'Electricidad' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Plomería' })).toHaveCount(0);
+  await topbarSearch.fill('plomería');
+  await topbarSearch.press('Enter');
+  await expect(page.getByRole('heading', { name: 'Plomería' })).toBeVisible();
+  await expect(favorite).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('textbox', { name: /Buscar servicios \(ej/ })).toHaveValue('plomería');
+  await page.goBack();
+  await expect(page.getByRole('heading', { name: 'Electricidad' })).toBeVisible();
+  await page.goForward();
+  await expect(favorite).toHaveAttribute('aria-pressed', 'true');
+});
+
+for (const role of ['CLIENT', 'ADMIN', 'PROVIDER'] as const) {
+  test(`topbar search is only offered for the client dashboard: ${role}`, async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.addInitScript((role) => {
+      localStorage.setItem('token', `header.${btoa(JSON.stringify({ role, sub: 'test', email: 'test@example.com' }))}.signature`);
+    }, role);
+    await mockNetwork(page);
+    await page.goto('/');
+    if (role === 'PROVIDER') await expect(page).toHaveURL(/\/provider$/);
+    const search = page.getByRole('searchbox', { name: 'Buscar servicios' });
+    if (role === 'CLIENT') await expect(search).toBeVisible();
+    else await expect(search).toHaveCount(0);
+  });
+}

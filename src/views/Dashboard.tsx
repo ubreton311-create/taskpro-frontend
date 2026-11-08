@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Search,
   MapPin,
@@ -183,8 +183,14 @@ const textFallbacks: Record<string, string> = {
 export default function Dashboard() {
   const { t, language } = useTranslation();
   const navigate = useNavigate();
-  
-  const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get("q") ?? "");
+  const location = useLocation();
+  const [searchInput, setSearchInput] = useState(() => ({
+    locationKey: location.key,
+    value: new URLSearchParams(location.search).get("q") ?? "",
+  }));
+  const search = searchInput.locationKey === location.key
+    ? searchInput.value
+    : new URLSearchParams(location.search).get("q") ?? "";
   const [favorites, setFavorites] = useState<string[]>([]);
 
   // Estados para producción
@@ -198,10 +204,10 @@ export default function Dashboard() {
   const locale = language === "es" ? "es-MX" : "en-US";
 
   useEffect(() => {
-    if (window.location.hash === "#popular-services") {
+    if (location.hash === "#popular-services") {
       document.getElementById("popular-services")?.scrollIntoView({ block: "start" });
     }
-  }, []);
+  }, [location.hash, location.key]);
 
   // --- CONEXIÓN REAL A PRODUCCIÓN ---
   useEffect(() => {
@@ -325,7 +331,7 @@ export default function Dashboard() {
                 />
                 <input
                   value={search}
-                  onChange={(event) => setSearch(event.target.value)}
+                  onChange={(event) => setSearchInput({ locationKey: location.key, value: event.target.value })}
                   placeholder={tx("hero.search")}
                   aria-label={tx("hero.search")}
                   className="w-full min-w-0 bg-transparent py-3 text-sm text-[#1a1a1a] outline-none placeholder:text-gray-500"

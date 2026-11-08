@@ -41,7 +41,6 @@ function PlaceholderPage() {
 }
 
 function HomeRoute() {
-  const location = useLocation();
   const user = getCurrentUser();
 
   if (user?.role === 'ADMIN') {
@@ -50,7 +49,7 @@ function HomeRoute() {
   if (user?.role === 'PROVIDER') {
     return <Navigate to="/provider" replace />;
   }
-  return <Dashboard key={location.search} />;
+  return <Dashboard />;
 }
 
 function QuotesRoute() {

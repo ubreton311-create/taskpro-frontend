@@ -27,7 +27,7 @@ Se ejecutó Chromium a 375 × 900 y 1440 × 900, con API simulada o sin disponib
 
 - Móvil: [antes](ux-screenshots/before-375.png) · [después](ux-screenshots/after-375.png).
 - Escritorio: [antes](ux-screenshots/before-1440.png) · [después](ux-screenshots/after-1440.png).
-- `./scripts/check-ux.sh`: lint, build y 14 pruebas Playwright aprobadas, incluidas reglas automatizadas axe WCAG A/AA en inicio, login, reserva, onboarding y soporte a ambos anchos; también drawer y modal abiertos. Las pruebas son con datos simulados y no prueban todos los estados ni reemplazan una auditoría manual.
+- `./scripts/check-ux.sh`: lint, build y 18 pruebas Playwright aprobadas, incluidas reglas automatizadas axe WCAG A/AA en inicio, login, reserva, onboarding y soporte a ambos anchos; también drawer y modal abiertos. Las pruebas son con datos simulados y no prueban todos los estados ni reemplazan una auditoría manual.
 - Contraste teórico de colores sólidos: blanco sobre `#7a2fbf` ≈ 7.03:1 y sobre `#64239f` ≈ 9.20:1. El hero usa degradado y decoraciones: verificar visualmente y medir la composición real; axe puede marcar degradados como imposibles de determinar.
 - El entry del build se redujo de 872.69 kB en el bundle único anterior a aproximadamente 276 kB; no es una medida de LCP, CLS ni mejora real percibida.
 

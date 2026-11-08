@@ -21,10 +21,10 @@ export default function Topbar({ onOpenMenu, menuOpen }: { onOpenMenu: () => voi
           <p className="hidden text-[11px] font-bold uppercase tracking-wider text-gray-500 md:block">TaskPro / {role}</p>
           <p className="truncate text-lg font-black leading-tight text-[#42116f] md:mt-1 md:text-xl">{getRouteTitle(location.pathname)}</p>
         </div>
-        <form className="relative ml-6 hidden lg:block" onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); navigate(`/?q=${encodeURIComponent(String(data.get("q") || "").trim())}#popular-services`); }}>
+        {user?.role !== "ADMIN" && user?.role !== "PROVIDER" && <form className="relative ml-6 hidden lg:block" onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); navigate(`/?q=${encodeURIComponent(String(data.get("q") || "").trim())}#popular-services`); }}>
           <Search className="absolute left-3 top-2.5 text-gray-400" size={18} aria-hidden="true" />
           <input name="q" type="search" aria-label="Buscar servicios" placeholder="Buscar en TaskPro..." className="w-72 rounded-xl border border-gray-200 bg-gray-50 py-2 pl-10 pr-4 text-sm focus:border-[#7a2fbf] focus:bg-white" />
-        </form>
+        </form>}
       </div>
       <div className="hidden items-center gap-4 md:flex">
         <LanguageSwitcher />
